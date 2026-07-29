@@ -4,15 +4,22 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "mijn-worker",
-	"main": "src/index.js",
+	"name": "app",
+	"main": "src/code.js",
 	"compatibility_date": "2026-07-28",
+	"workers_dev": true,
+	"vars": {
+		"GOOGLE_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbyVsc2KHocAkGb4slg768TRC93INuGNFHn3ITkuI6OJD9m1a0lV8Em204ktzVVTlJUGuA/exec"
+	},
 	"observability": {
 		"enabled": true
 	},
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"rules": [
+		{ "type": "Text", "globs": ["**/*.html"] }
 	]
 	/**
 	 * Smart Placement

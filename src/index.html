@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <!-- defer: voorkomt dat de paginaweergave blokkeert als deze CDN-scripts traag laden -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    /* --- Kleur- en font-tokens --- */
+    :root {
+      --bg: #F4F6F5;
+      --surface: #FFFFFF;
+      --ink: #1D2621;
+      --ink-muted: #667069;
+      --pine: #14532D;
+      --pine-deep: #0B3A1E;
+      --lime: #6FBE44;
+      --brass: #D9A441;
+      --border: #E3E7E4;
+      --bubble-user-text: #F5F9F6;
+      --danger: #C62828;
+      --focus-ring: rgba(20, 83, 45, 0.16);
+      --chat-pattern: none;
+      --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14181D;
+        --surface: #1D2228;
+        --ink: #E8ECEA;
+        --ink-muted: #9AA5A0;
+        --pine: #2F6B45;
+        --pine-deep: #1E4A30;
+        --lime: #8BC34A;
+        --brass: #E0B15C;
+        --border: #2A3238;
+        --bubble-user-text: #EFF3F1;
+        --danger: #E57373;
+        --focus-ring: rgba(139, 195, 74, 0.22);
+        --chat-pattern: none;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #14181D;
+      --surface: #1D2228;
+      --ink: #E8ECEA;
+      --ink-muted: #9AA5A0;
+      --pine: #2F6B45;
+      --pine-deep: #1E4A30;
+      --lime: #8BC34A;
+      --brass: #E0B15C;
+      --border: #2A3238;
+      --bubble-user-text: #EFF3F1;
+      --danger: #E57373;
+      --focus-ring: rgba(139, 195, 74, 0.22);
+      --chat-pattern: none;
+    }
+    :root[data-theme="light"] {
+      --bg: #F4F6F5;
+      --surface: #FFFFFF;
+      --ink: #1D2621;
+      --ink-muted: #667069;
+      --pine: #14532D;
+      --pine-deep: #0B3A1E;
+      --lime: #6FBE44;
+      --brass: #D9A441;
+      --border: #E3E7E4;
+      --bubble-user-text: #F5F9F6;
+      --danger: #C62828;
+      --focus-ring: rgba(20, 83, 45, 0.16);
+      --chat-pattern: none;
+    }
+
+    html {
+      background: var(--bg);
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--ink);
+      -webkit-text-size-adjust: 100%;
+    }
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      body, header, .faq-header, #berichten, .bericht, #invoerBalk, .login-kaart, #loginOverlay, .optieBtn, .faq-categorie-chip {
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      }
+    }
+    header {
+      position: relative;
+      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      color: var(--bubble-user-text);
+      padding: 18px 16px 14px;
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+    header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: var(--brass);
+      opacity: 0.9;
+    }
+    #belKnop {
+      position: fixed;
+      right: 16px;
+      bottom: 85px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--brass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px -6px rgba(0,0,0,0.4);
+      text-decoration: none;
+      z-index: 10;
+      border: none;
+    }
+    #belKnop svg {
+      width: 24px;
+      height: 24px;
+      fill: #1B140A;
+    }
+    #belMenu {
+      position: fixed;
+      right: 16px;
+      bottom: 145px;
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px -18px rgba(0,0,0,0.4);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      max-height: 60vh;
+      z-index: 20;
+      min-width: 230px;
+    }
+    .bel-item {
+      display: block;
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .bel-item:active {
+      background: var(--bg);
+    }
+    #menuKnop {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #menuKnop svg {
+      width: 26px;
+      height: 26px;
+      fill: var(--brass);
+    }
+    .thema-knop {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      background: transparent;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thema-knop svg {
+      width: 22px;
+      height: 22px;
+      fill: var(--brass);
+      stroke: var(--brass);
+    }
+    #themaKnop {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+    }
+    .verborgen {
+      display: none !important;
+    }
+
+    /* --- HERZIENE RESPONSIEVE INLOG-OVERLAY --- */
+    #loginOverlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--pine);
+      background-image:
+        radial-gradient(circle at 28% 18%, var(--pine) 0%, var(--pine-deep) 72%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cg id='ll' fill='none' stroke='%233F6B4D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M -9,0 A 9,9 0 0 1 9,0 L -9,0 Z'/%3E%3Cline x1='0' y1='0' x2='7.79' y2='-4.5'/%3E%3Cline x1='0' y1='0' x2='4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='0' y2='-9'/%3E%3Cline x1='0' y1='0' x2='-4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='-7.79' y2='-4.5'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23ll' transform='translate(20,25) rotate(-15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(70,15) rotate(20) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(130,30) rotate(-30) scale(1.3)'/%3E%3Cuse href='%23ll' transform='translate(180,70) rotate(10) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(40,80) rotate(40) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(100,90) rotate(-10) scale(0.7)'/%3E%3Cuse href='%23ll' transform='translate(160,120) rotate(25) scale(1.2)'/%3E%3Cuse href='%23ll' transform='translate(15,140) rotate(-25) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(75,150) rotate(15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(140,170) rotate(-5) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(190,180) rotate(35) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(50,190) rotate(-20) scale(0.85)'/%3E%3C/g%3E%3C/defs%3E%3C/svg%3E");
+      background-repeat: no-repeat, repeat;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    #themaKnopLogin {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+    }
+    .login-kaart {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px 24px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 24px 44px -18px rgba(0,0,0,0.5);
+    }
+    .login-titel {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .login-input {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin: 8px 0 14px;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--pine);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .code-input {
+      text-align: center;
+      letter-spacing: 0.5em;
+      font-size: 24px;
+      font-variant-numeric: tabular-nums;
+    }
+    .onthouden-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--ink-muted);
+      margin: 4px 0 18px;
+    }
+    .onthouden-label input {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      accent-color: var(--pine);
+    }
+    #loginBtn, #verificatieBtn {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: bold;
+      background: var(--pine);
+      color: var(--bubble-user-text);
+      border: none;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    #loginBtn:disabled, #verificatieBtn:disabled {
+      opacity: 0.6;
+    }
+    .login-foutmelding {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 12px;
+      text-align: center;
+      min-height: 20px;
+    }
+    .login-hint {
+      color: var(--ink-muted);
+      font-size: 14px;
+      margin-top: 6px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .verificatie-opnieuw-btn {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--ink-muted);
+      font-size: 14px;
+      text-decoration: underline;
+      margin-top: 16px;
+      padding: 8px;
+    }
+    .login-footer {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: rgba(245,244,236,0.75);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* --- OVERIGE INTERFACE ELEMENTEN --- */
+    #menuAchtergrond {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+      z-index: 15;
+    }
+    #menuDropdown {
+      position: absolute;
+      top: 56px;
+      left: 12px;
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px -18px rgba(0,0,0,0.4);
+      overflow: hidden;
+      z-index: 20;
+      min-width: 220px;
+    }
+    .menu-item {
+      display: block;
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: none;
+      text-align: left;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .menu-item:active {
+      background: var(--bg);
+    }
+    #faqOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    .faq-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px;
+      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+    }
+    .faq-header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: var(--brass);
+      opacity: 0.9;
+    }
+    #themaKnopFaq {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+    }
+    #faqZoek {
+      flex: 1;
+      max-width: 280px;
+      padding: 10px 14px;
+      font-size: 15px;
+      border: none;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    #faqSluiten {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+      background: transparent;
+      border: none;
+      color: var(--bubble-user-text);
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .faq-categorieen {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      -webkit-overflow-scrolling: touch;
+    }
+    .faq-categorie-chip {
+      flex: 0 0 auto;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-muted);
+      font-size: 14px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .faq-categorie-chip.actief {
+      background: var(--pine);
+      border-color: var(--pine);
+      color: var(--bubble-user-text);
+    }
+    .faq-lijst {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: var(--bg);
+    }
+    .faq-item {
+      display: block;
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--surface);
+      border: none;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 16px;
+      color: var(--ink);
+    }
+    .faq-item:active {
+      background: var(--bg);
+    }
+    .faq-melding {
+      padding: 24px 18px;
+      color: var(--ink-muted);
+      font-size: 16px;
+    }
+
+    #routeOverlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+    .route-header {
+      position: relative;
+      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      color: var(--bubble-user-text);
+      padding: 18px 16px 14px;
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      text-align: center;
+    }
+    .route-header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: var(--brass);
+      opacity: 0.9;
+    }
+    #routeSluiten {
+      position: absolute;
+      top: 50%;
+      left: 12px;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border: none;
+      color: var(--bubble-user-text);
+      font-size: 24px;
+      font-weight: bold;
+    }
+    #themaKnopRoute {
+      position: absolute;
+      top: 50%;
+      right: 12px;
+      transform: translateY(-50%);
+    }
+    .route-inhoud {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 16px;
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--bg);
+    }
+    #routeInvoerScherm {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 10px;
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+    #routeInput {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--ink);
+    }
+    .route-btn, .route-btn-secundair {
+      width: 100%;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 12px;
+    }
+    #routeZoekBtn {
+      width: auto;
+      flex: 0 0 auto;
+      padding: 0 20px;
+      font-size: 15px;
+    }
+    .route-btn {
+      background: var(--pine);
+      color: var(--bubble-user-text);
+      border: none;
+    }
+    #routeDownloadBtn {
+      display: block;
+      width: 90%;
+      max-width: 340px;
+      margin: 18px auto 0;
+    }
+    .route-btn-secundair {
+      background: var(--surface);
+      color: var(--pine);
+      border: 1px solid var(--pine);
+    }
+    #routeOntgrendelOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .route-ontgrendel-kaart {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: 90%;
+      max-width: 360px;
+      box-shadow: 0 24px 44px -18px rgba(0,0,0,0.45);
+    }
+    .route-ontgrendel-tekst {
+      font-size: 15px;
+      color: var(--ink);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .route-ontgrendel-kaart input {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--ink);
+      margin-bottom: 10px;
+    }
+    .route-ontgrendel-foutmelding {
+      color: var(--danger);
+      font-size: 14px;
+      text-align: center;
+      min-height: 18px;
+      margin-bottom: 10px;
+    }
+    .route-ontgrendel-knoppen {
+      display: flex;
+      gap: 10px;
+    }
+    .route-ontgrendel-knoppen button {
+      flex: 1;
+      width: auto;
+      padding: 12px;
+      font-size: 15px;
+    }
+    .route-suggestie-btn {
+      display: block;
+      width: 90%;
+      max-width: 360px;
+      margin: 10px auto 0;
+      padding: 12px;
+      font-size: 15px;
+    }
+    .route-melding {
+      padding: 20px 16px;
+      color: var(--ink-muted);
+      font-size: 16px;
+      text-align: center;
+    }
+    .route-pdf-pagina {
+      display: block;
+      width: 100%;
+      max-width: 520px;
+      height: auto;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 10px 24px -12px rgba(0,0,0,0.3);
+    }
+    .route-pagina-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .route-pagina-nav-btn, .route-vergroot-knop {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      border: 1px solid var(--pine);
+      background: var(--surface);
+      color: var(--pine);
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .route-pagina-nav-btn:disabled {
+      opacity: 0.35;
+    }
+    .route-vergroot-knop svg {
+      width: 20px;
+      height: 20px;
+    }
+    .route-pagina-label {
+      font-size: 15px;
+      color: var(--ink-muted);
+      min-width: 100px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+    .route-pagina-container {
+      display: flex;
+      justify-content: center;
+    }
+    #routeVergrootOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+    #routeVergrootSluiten {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 51;
+    }
+    #routeVergrootContainer {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: safe center;
+      justify-content: safe center;
+      overflow: auto;
+    }
+    #routeVergrootContainer img {
+      display: block;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+    #routeVergrootNav {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding-top: 14px;
+    }
+    #routeVergrootNav button {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    #routeVergrootNav button:disabled {
+      opacity: 0.3;
+    }
+    #routeVergrootLabel {
+      color: #fff;
+      font-size: 15px;
+      min-width: 100px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    /* --- CHATBERICHTEN & INVOERBALK --- */
+    #berichten {
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background-color: var(--bg);
+      background-image: var(--chat-pattern);
+      background-repeat: repeat;
+    }
+    .bericht {
+      max-width: 88%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      font-size: 16px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+    .gebruiker {
+      align-self: flex-end;
+      background: var(--pine);
+      color: var(--bubble-user-text);
+      border-bottom-right-radius: 4px;
+    }
+    .bot {
+      align-self: flex-start;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+    #invoerBalk {
+      display: flex;
+      padding: 12px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+    #vraagInput {
+      flex: 1;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    #verstuurBtn {
+      padding: 0 22px;
+      font-size: 16px;
+      font-weight: bold;
+      background: var(--pine);
+      color: var(--bubble-user-text);
+      border: none;
+      border-radius: 12px;
+    }
+    #verstuurBtn:disabled {
+      opacity: 0.5;
+    }
+    .opties {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .optieBtn {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--pine);
+      background: var(--surface);
+      color: var(--pine);
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .optieBtn:disabled {
+      opacity: 0.4;
+    }
+    .typing-dots {
+      display: flex;
+      gap: 5px;
+      padding: 4px 0;
+    }
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ink-muted);
+      display: inline-block;
+      animation: typingBounce 1.2s infinite ease-in-out;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-4px); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="loginOverlay">
+      <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
+      <div id="loginKaart" class="login-kaart">
+        <div class="login-titel">HelloFresh Guide</div>
+        <input id="loginId" class="login-input" type="text" placeholder="Vul je chauffeurs-ID in" autocomplete="off">
+        <label class="onthouden-label">
+          <input type="checkbox" id="loginOnthouden" checked>
+          Dit toestel onthouden
+        </label>
+        <button id="loginBtn"><span id="loginBtnTekst">Inloggen</span><span id="loginSpinner" class="spinner verborgen"></span></button>
+        <div id="loginFout" class="login-foutmelding"></div>
+        <div class="login-hint">Je ID-code vind je terug in de Quinyx-app.</div>
+      </div>
+      <div id="verificatieKaart" class="login-kaart verborgen">
+        <div class="login-titel">Verificatiecode</div>
+        <div class="login-hint">We hebben een code gestuurd naar je e-mailadres. Vul 'm hieronder in.</div>
+        <input id="verificatieInput" class="login-input code-input" type="text" inputmode="numeric" maxlength="5" placeholder="•••••" autocomplete="off">
+        <button id="verificatieBtn"><span id="verificatieBtnTekst">Bevestigen</span><span id="verificatieSpinner" class="spinner verborgen"></span></button>
+        <div id="verificatieFout" class="login-foutmelding"></div>
+        <button id="verificatieOpnieuwBtn" class="verificatie-opnieuw-btn">Geen code ontvangen? Opnieuw versturen</button>
+      </div>
+      <div class="login-footer">Alle rechten voorbehouden.<br>Ontwikkeld door Nick Lammers</div>
+    </div>
+    <header>
+      <button id="menuKnop" aria-label="Menu">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+        </svg>
+      </button>
+      HelloFresh Guide
+      <button id="themaKnop" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
+    </header>
+    <div id="menuAchtergrond" class="verborgen"></div>
+    <div id="menuDropdown" class="verborgen">
+      <button id="faqMenuItem" class="menu-item">FAQ</button>
+      <button id="routeMenuItem" class="menu-item">Routelijst digitaal</button>
+      <button id="uitloggenMenuItem" class="menu-item">Uitloggen</button>
+    </div>
+    <div id="faqOverlay" class="verborgen">
+      <div class="faq-header">
+        <input id="faqZoek" type="text" placeholder="Zoek een vraag...">
+        <button id="faqSluiten" aria-label="Sluiten">&times;</button>
+        <button id="themaKnopFaq" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
+      </div>
+      <div id="faqCategorieen" class="faq-categorieen"></div>
+      <div id="faqLijst" class="faq-lijst"></div>
+    </div>
+    <div id="routeOverlay" class="verborgen">
+      <div class="route-header">
+        <button id="routeSluiten" aria-label="Sluiten">&times;</button>
+        Routelijst digitaal
+        <button id="themaKnopRoute" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
+      </div>
+      <div class="route-inhoud">
+        <div id="routeInvoerScherm">
+          <input id="routeInput" type="text" autocomplete="off" autocapitalize="characters" placeholder="Volledig routenummer, bijv. DUIAM-260712-6183">
+          <button id="routeZoekBtn" class="route-btn">Zoeken</button>
+        </div>
+        <div id="routeResultaat"></div>
+      </div>
+    </div>
+    <div id="routeOntgrendelOverlay" class="verborgen">
+      <div class="route-ontgrendel-kaart">
+        <div class="route-ontgrendel-tekst">Dit is een route van gisteren. Vul hieronder de ontgrendelcode in.</div>
+        <input id="routeOntgrendelPopupInvoer" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="Ontgrendelcode">
+        <div id="routeOntgrendelPopupFout" class="route-ontgrendel-foutmelding"></div>
+        <div class="route-ontgrendel-knoppen">
+          <button id="routeOntgrendelAnnuleren" class="route-btn-secundair">Annuleren</button>
+          <button id="routeOntgrendelBevestigen" class="route-btn">Bevestigen</button>
+        </div>
+      </div>
+    </div>
+    <div id="routeVergrootOverlay" class="verborgen">
+      <button id="routeVergrootSluiten" aria-label="Sluiten">&times;</button>
+      <div id="routeVergrootContainer"></div>
+      <div id="routeVergrootNav">
+        <button id="routeVergrootVorige" aria-label="Vorige pagina">‹</button>
+        <span id="routeVergrootLabel"></span>
+        <button id="routeVergrootVolgende" aria-label="Volgende pagina">›</button>
+      </div>
+    </div>
+    <div id="berichten"></div>
+    <button id="belKnop" aria-label="Bel een HUB">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/>
+      </svg>
+    </button>
+    <div id="belMenu" class="verborgen"></div>
+    <div id="invoerBalk">
+      <input id="vraagInput" type="text" placeholder="Typ je vraag..." autocomplete="off">
+      <button id="verstuurBtn">Verstuur</button>
+    </div>
+  </div>
+
+  <script>
+    const berichtenEl = document.getElementById('berichten');
+    const inputEl = document.getElementById('vraagInput');
+    const knopEl = document.getElementById('verstuurBtn');
+    const belKnopEl = document.getElementById('belKnop');
+    const belMenuEl = document.getElementById('belMenu');
+
+    // --- Thema (licht/donker) ---
+    const THEMA_KEY = 'hf_thema';
+    const themaKnopEl = document.getElementById('themaKnop');
+    const themaKnopFaqEl = document.getElementById('themaKnopFaq');
+    const themaKnopLoginEl = document.getElementById('themaKnopLogin');
+    const themaKnopRouteEl = document.getElementById('themaKnopRoute');
+    const ZON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5" fill="currentColor" stroke="none"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></svg>';
+    const MAAN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
+    function pasThemaToe(thema) {
+      document.documentElement.setAttribute('data-theme', thema);
+      const icoon = thema === 'dark' ? ZON_SVG : MAAN_SVG;
+      themaKnopEl.innerHTML = icoon;
+      themaKnopFaqEl.innerHTML = icoon;
+      themaKnopLoginEl.innerHTML = icoon;
+      themaKnopRouteEl.innerHTML = icoon;
+    }
+
+    function haalVoorkeurThema() {
+      try {
+        const opgeslagen = localStorage.getItem(THEMA_KEY);
+        if (opgeslagen === 'light' || opgeslagen === 'dark') return opgeslagen;
+      } catch (e) {}
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    }
+
+    pasThemaToe(haalVoorkeurThema());
+
+    function wisselThema() {
+      const huidig = document.documentElement.getAttribute('data-theme');
+      const nieuw = huidig === 'dark' ? 'light' : 'dark';
+      pasThemaToe(nieuw);
+      try { localStorage.setItem(THEMA_KEY, nieuw); } catch (e) {}
+    }
+
+    themaKnopEl.addEventListener('click', wisselThema);
+    themaKnopFaqEl.addEventListener('click', wisselThema);
+    themaKnopLoginEl.addEventListener('click', wisselThema);
+    themaKnopRouteEl.addEventListener('click', wisselThema);
+
+    const HUB_NUMMERS = [
+      { naam: 'HUB Duiven', nummer: '0852020125' },
+      { naam: 'HUB Etten-Leur', nummer: '0852020126' },
+      { naam: 'HUB Ruinerwold', nummer: '0852020128' },
+      { naam: 'HUB Diemen', nummer: '0852020129' },
+      { naam: 'HUB Bleiswijk', nummer: '0852020130' },
+      { naam: 'De Kas', nummer: '0852020133' },
+      { naam: 'HUB Nieuwegein', nummer: '0852020134' },
+      { naam: 'HUB Maastricht', nummer: '0852020135' },
+      { naam: 'HUB Groningen', nummer: '0852020145' },
+      { naam: 'HUB Gent', nummer: '003292742429' },
+      { naam: 'HUB Namur', nummer: '003271962241' },
+      { naam: 'HUB Antwerpen', nummer: '003233611798' },
+      { naam: 'HUB Brussel', nummer: '003224866764' }
+    ];
+    const menuKnopEl = document.getElementById('menuKnop');
+    const menuDropdownEl = document.getElementById('menuDropdown');
+    const menuAchtergrondEl = document.getElementById('menuAchtergrond');
+    const faqMenuItemEl = document.getElementById('faqMenuItem');
+    const uitloggenMenuItemEl = document.getElementById('uitloggenMenuItem');
+    const faqOverlayEl = document.getElementById('faqOverlay');
+    const faqZoekEl = document.getElementById('faqZoek');
+    const faqCategorieenEl = document.getElementById('faqCategorieen');
+    const faqLijstEl = document.getElementById('faqLijst');
+    const faqSluitenEl = document.getElementById('faqSluiten');
+    let actieveCategorie = 'Alle';
+
+    let alleVragen = [];
+
+    const GEEN_ANTWOORD_TEKST = 'Hier heb ik geen antwoord op, neem contact op met de HUB.';
+
+    function appsScriptCall(actie, argumenten) {
+      return fetch('/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ actie: actie, argumenten: argumenten || [] })
+      }).then(function(response) { 
+        if (!response.ok) throw new Error('Netwerkfout');
+        return response.json(); 
+      });
+    }
+
+    let huidigeId = null;
+    let huidigeHub = null;
+    let huidigeApparaatToken = '';
+
+    let idInVerificatie = null;
+    let voornaamInVerificatie = null;
+
+    let onthoudenGewenst = true;
+
+    const APPARAAT_ID_KEY = 'hf_apparaat_id';
+    const APPARAAT_TOKEN_KEY = 'hf_apparaat_token';
+
+    function haalOpgeslagenApparaat() {
+      try {
+        const id = localStorage.getItem(APPARAAT_ID_KEY);
+        const token = localStorage.getItem(APPARAAT_TOKEN_KEY);
+        if (id && token) return { id: id, token: token };
+      } catch (e) {}
+      return null;
+    }
+
+    function haalOpgeslagenApparaatToken(idCode) {
+      const opgeslagen = haalOpgeslagenApparaat();
+      if (opgeslagen && opgeslagen.id.trim().toLowerCase() === idCode.trim().toLowerCase()) {
+        return opgeslagen.token;
+      }
+      return '';
+    }
+
+    function slaApparaatTokenOpLokaal(idCode, token) {
+      try {
+        localStorage.setItem(APPARAAT_ID_KEY, idCode);
+        localStorage.setItem(APPARAAT_TOKEN_KEY, token);
+      } catch (e) {}
+    }
+
+    function wisApparaatTokenLokaal() {
+      try {
+        localStorage.removeItem(APPARAAT_ID_KEY);
+        localStorage.removeItem(APPARAAT_TOKEN_KEY);
+      } catch (e) {}
+    }
+
+    const loginOverlayEl = document.getElementById('loginOverlay');
+    const loginKaartEl = document.getElementById('loginKaart');
+    const loginIdEl = document.getElementById('loginId');
+    const loginOnthoudenEl = document.getElementById('loginOnthouden');
+    const loginBtnEl = document.getElementById('loginBtn');
+    const loginBtnTekstEl = document.getElementById('loginBtnTekst');
+    const loginSpinnerEl = document.getElementById('loginSpinner');
+    const loginFoutEl = document.getElementById('loginFout');
+
+    const verificatieKaartEl = document.getElementById('verificatieKaart');
+    const verificatieInputEl = document.getElementById('verificatieInput');
+    const verificatieBtnEl = document.getElementById('verificatieBtn');
+    const verificatieBtnTekstEl = document.getElementById('verificatieBtnTekst');
+    const verificatieSpinnerEl = document.getElementById('verificatieSpinner');
+    const verificatieFoutEl = document.getElementById('verificatieFout');
+    const verificatieOpnieuwBtnEl = document.getElementById('verificatieOpnieuwBtn');
+
+    function startChat(voornaam) {
+      const naamDeel = voornaam ? ' ' + voornaam : '';
+      voegBerichtToe('Hi' + naamDeel + '! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.', 'bot');
+    }
+
+    function toonLogin(foutmelding) {
+      loginOverlayEl.classList.remove('verborgen');
+      verificatieKaartEl.classList.add('verborgen');
+      loginKaartEl.classList.remove('verborgen');
+      loginFoutEl.textContent = foutmelding || '';
+      loginIdEl.value = '';
+      loginIdEl.focus();
+    }
+
+    function verbergLogin() {
+      loginOverlayEl.classList.add('verborgen');
+    }
+
+    function voltooiGeslaagdeLogin(idCode, apparaatToken, voornaam, hub) {
+      huidigeId = idCode;
+      huidigeApparaatToken = apparaatToken;
+      huidigeHub = hub;
+      if (onthoudenGewenst) {
+        slaApparaatTokenOpLokaal(idCode, apparaatToken);
+      } else {
+        wisApparaatTokenLokaal();
+      }
+      verbergLogin();
+      startChat(voornaam);
+    }
+
+    function toonSessieVerlopen() {
+      huidigeId = null;
+      huidigeHub = null;
+      huidigeApparaatToken = '';
+      wisApparaatTokenLokaal();
+      toonLogin('Je sessie is verlopen, log opnieuw in.');
+    }
+
+    function toonVerificatieScherm() {
+      loginFoutEl.textContent = '';
+      loginKaartEl.classList.add('verborgen');
+      verificatieKaartEl.classList.remove('verborgen');
+      verificatieInputEl.value = '';
+      verificatieFoutEl.textContent = '';
+      verificatieInputEl.focus();
+    }
+
+    function verstuurVerificatiecode() {
+      verificatieBtnEl.disabled = true;
+      appsScriptCall('verstuurVerificatiecode', [idInVerificatie])
+        .then(function(resultaat) {
+          verificatieBtnEl.disabled = false;
+          if (!resultaat || !resultaat.verstuurd) {
+            verificatieFoutEl.textContent = (resultaat && resultaat.fout) || 'Kon geen verificatiecode versturen.';
+          }
+        })
+        .catch(function() {
+          verificatieBtnEl.disabled = false;
+          verificatieFoutEl.textContent = 'Er ging iets mis bij het versturen van de code, probeer het nogmaals.';
+        });
+    }
+
+    function probeerAutoLogin() {
+      const opgeslagen = haalOpgeslagenApparaat();
+      if (!opgeslagen) {
+        toonLogin();
+        return;
+      }
+
+      appsScriptCall('checkInloggen', [opgeslagen.id, opgeslagen.token])
+        .then(function(resultaat) {
+          if (resultaat && resultaat.geldig) {
+            voltooiGeslaagdeLogin(opgeslagen.id, opgeslagen.token, resultaat.voornaam, resultaat.hub);
+          } else {
+            toonLogin();
+          }
+        })
+        .catch(function() {
+          toonLogin();
+        });
+    }
+
+    loginBtnEl.addEventListener('click', function() {
+      const idCode = loginIdEl.value.trim();
+      if (!idCode) return;
+
+      onthoudenGewenst = loginOnthoudenEl.checked;
+      const opgeslagenToken = haalOpgeslagenApparaatToken(idCode);
+
+      loginBtnEl.disabled = true;
+      loginFoutEl.textContent = '';
+      loginBtnTekstEl.textContent = 'Bezig met inloggen...';
+      loginSpinnerEl.classList.remove('verborgen');
+
+      appsScriptCall('checkInloggen', [idCode, opgeslagenToken])
+        .then(function(resultaat) {
+          loginBtnEl.disabled = false;
+          loginBtnTekstEl.textContent = 'Inloggen';
+          loginSpinnerEl.classList.add('verborgen');
+          if (resultaat && resultaat.geldig) {
+            voltooiGeslaagdeLogin(idCode, opgeslagenToken, resultaat.voornaam, resultaat.hub);
+          } else if (resultaat && resultaat.status === 'verificatie_vereist') {
+            idInVerificatie = idCode;
+            voornaamInVerificatie = resultaat.voornaam;
+            toonVerificatieScherm();
+            verstuurVerificatiecode();
+          } else if (resultaat && resultaat.status === 'inactief') {
+            toonLogin('Deze ID-code is nog niet actief. Neem contact op met de HUB.');
+          } else {
+            toonLogin('Ongeldige ID-code, probeer het nogmaals.');
+          }
+        })
+        .catch(function() {
+          loginBtnEl.disabled = false;
+          loginBtnTekstEl.textContent = 'Inloggen';
+          loginSpinnerEl.classList.add('verborgen');
+          toonLogin('Er ging iets mis, probeer het nogmaals.');
+        });
+    });
+
+    loginIdEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') loginBtnEl.click();
+    });
+
+    verificatieBtnEl.addEventListener('click', function() {
+      const code = verificatieInputEl.value.trim();
+      if (!code) return;
+
+      verificatieBtnEl.disabled = true;
+      verificatieFoutEl.textContent = '';
+      verificatieBtnTekstEl.textContent = 'Bezig met controleren...';
+      verificatieSpinnerEl.classList.remove('verborgen');
+
+      appsScriptCall('verifieerCode', [idInVerificatie, code])
+        .then(function(verificatieResultaat) {
+          if (!verificatieResultaat || !verificatieResultaat.geldig) {
+            verificatieBtnEl.disabled = false;
+            verificatieBtnTekstEl.textContent = 'Bevestigen';
+            verificatieSpinnerEl.classList.add('verborgen');
+            verificatieFoutEl.textContent = (verificatieResultaat && verificatieResultaat.fout) || 'Onjuiste code.';
+            return;
+          }
+
+          appsScriptCall('checkInloggen', [idInVerificatie, verificatieResultaat.apparaatToken])
+            .then(function(inlogInfo) {
+              verificatieBtnEl.disabled = false;
+              verificatieBtnTekstEl.textContent = 'Bevestigen';
+              verificatieSpinnerEl.classList.add('verborgen');
+              voltooiGeslaagdeLogin(idInVerificatie, verificatieResultaat.apparaatToken, inlogInfo && inlogInfo.voornaam || voornaamInVerificatie, inlogInfo && inlogInfo.hub);
+            })
+            .catch(function() {
+              verificatieBtnEl.disabled = false;
+              verificatieBtnTekstEl.textContent = 'Bevestigen';
+              verificatieSpinnerEl.classList.add('verborgen');
+              voltooiGeslaagdeLogin(idInVerificatie, verificatieResultaat.apparaatToken, voornaamInVerificatie, null);
+            });
+        })
+        .catch(function() {
+          verificatieBtnEl.disabled = false;
+          verificatieBtnTekstEl.textContent = 'Bevestigen';
+          verificatieSpinnerEl.classList.add('verborgen');
+          verificatieFoutEl.textContent = 'Er ging iets mis, probeer het nogmaals.';
+        });
+    });
+
+    verificatieInputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') verificatieBtnEl.click();
+    });
+
+    verificatieOpnieuwBtnEl.addEventListener('click', function() {
+      verificatieFoutEl.textContent = '';
+      verstuurVerificatiecode();
+    });
+
+    probeerAutoLogin();
+
+    function voegBerichtToe(tekst, type) {
+      const div = document.createElement('div');
+      div.className = 'bericht ' + type;
+      div.textContent = tekst;
+      berichtenEl.appendChild(div);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function toonTypingIndicator() {
+      const bubble = document.createElement('div');
+      bubble.className = 'bericht bot';
+      bubble.id = 'typingIndicator';
+
+      const dotsEl = document.createElement('div');
+      dotsEl.className = 'typing-dots';
+      dotsEl.innerHTML = '<span></span><span></span><span></span>';
+      bubble.appendChild(dotsEl);
+
+      berichtenEl.appendChild(bubble);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function verwijderTypingIndicator() {
+      const bubble = document.getElementById('typingIndicator');
+      if (bubble) bubble.remove();
+    }
+
+    function toonStap(stap) {
+      if (stap && stap.ongeldigeSessie) {
+        toonSessieVerlopen();
+        return;
+      }
+
+      const heeftTekst = !!(stap && stap.tekst);
+      const heeftOpties = !!(stap && stap.opties && stap.opties.length);
+      const heeftSuggesties = !!(stap && stap.suggesties && stap.suggesties.length);
+
+      if (!heeftTekst && !heeftOpties && !heeftSuggesties) {
+        voegBerichtToe(GEEN_ANTWOORD_TEKST, 'bot');
+        return;
+      }
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bericht bot';
+
+      if (heeftTekst) {
+        const tekstEl = document.createElement('div');
+        tekstEl.textContent = stap.tekst;
+        bubble.appendChild(tekstEl);
+      } else if (heeftSuggesties) {
+        const tekstEl = document.createElement('div');
+        tekstEl.textContent = 'Hier heb ik geen exact antwoord op gevonden. Bedoel je misschien een van deze vragen?';
+        bubble.appendChild(tekstEl);
+      }
+
+      if (heeftOpties) {
+        const optiesEl = document.createElement('div');
+        optiesEl.className = 'opties';
+
+        stap.opties.forEach(function(optie) {
+          const btn = document.createElement('button');
+          btn.className = 'optieBtn';
+          btn.textContent = optie.tekst;
+          btn.addEventListener('click', function() {
+            optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+
+            voegBerichtToe(optie.tekst, 'gebruiker');
+            toonTypingIndicator();
+
+            appsScriptCall('haalStap', [huidigeId, huidigeApparaatToken, optie.id])
+              .then(function(volgendeStap) {
+                verwijderTypingIndicator();
+                toonStap(volgendeStap);
+              })
+              .catch(function() {
+                verwijderTypingIndicator();
+                voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+              });
+          });
+          optiesEl.appendChild(btn);
+        });
+
+        bubble.appendChild(optiesEl);
+      }
+
+      if (heeftSuggesties) {
+        const suggestiesEl = document.createElement('div');
+        suggestiesEl.className = 'opties';
+
+        stap.suggesties.forEach(function(suggestie) {
+          const btn = document.createElement('button');
+          btn.className = 'optieBtn';
+          btn.textContent = suggestie.vraag;
+          btn.addEventListener('click', function() {
+            suggestiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+            kiesFaqVraag(suggestie);
+          });
+          suggestiesEl.appendChild(btn);
+        });
+
+        bubble.appendChild(suggestiesEl);
+      }
+
+      berichtenEl.appendChild(bubble);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function verstuurVraag() {
+      const tekst = inputEl.value.trim();
+      if (!tekst) return;
+
+      voegBerichtToe(tekst, 'gebruiker');
+      inputEl.value = '';
+      inputEl.disabled = true;
+      knopEl.disabled = true;
+      toonTypingIndicator();
+
+      appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst])
+        .then(function(stap) {
+          verwijderTypingIndicator();
+          toonStap(stap);
+          inputEl.disabled = false;
+          knopEl.disabled = false;
+          inputEl.focus();
+        })
+        .catch(function() {
+          verwijderTypingIndicator();
+          voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+          inputEl.value = tekst;
+          inputEl.disabled = false;
+          knopEl.disabled = false;
+        });
+    }
+
+    menuKnopEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const verborgen = menuDropdownEl.classList.toggle('verborgen');
+      menuAchtergrondEl.classList.toggle('verborgen', verborgen);
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!menuDropdownEl.contains(e.target) && !menuKnopEl.contains(e.target)) {
+        menuDropdownEl.classList.add('verborgen');
+        menuAchtergrondEl.classList.add('verborgen');
+      }
+    });
+
+    uitloggenMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+      huidigeId = null;
+      huidigeHub = null;
+      huidigeApparaatToken = '';
+      wisApparaatTokenLokaal();
+      berichtenEl.innerHTML = '';
+      toonLogin();
+    });
+
+    faqMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+      faqOverlayEl.classList.remove('verborgen');
+      faqZoekEl.value = '';
+      actieveCategorie = 'Alle';
+      faqCategorieenEl.innerHTML = '';
+      faqLijstEl.innerHTML = '<div class="faq-melding">Laden...</div>';
+
+      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken])
+        .then(function(resultaat) {
+          if (resultaat && resultaat.ongeldigeSessie) {
+            faqOverlayEl.classList.add('verborgen');
+            toonSessieVerlopen();
+            return;
+          }
+          alleVragen = (resultaat && resultaat.vragen) || [];
+          toonCategorieChips();
+          pasFaqFilterToe();
+        })
+        .catch(function() {
+          faqLijstEl.innerHTML = '<div class="faq-melding">Kon de vragen niet laden, probeer het nog eens.</div>';
+        });
+    });
+
+    faqSluitenEl.addEventListener('click', function() {
+      faqOverlayEl.classList.add('verborgen');
+    });
+
+    faqZoekEl.addEventListener('input', pasFaqFilterToe);
+
+    function toonCategorieChips() {
+      const categorieen = ['Alle'];
+      alleVragen.forEach(function(v) {
+        if (categorieen.indexOf(v.categorie) === -1) categorieen.push(v.categorie);
+      });
+
+      faqCategorieenEl.innerHTML = '';
+      categorieen.forEach(function(categorie) {
+        const chip = document.createElement('button');
+        chip.className = 'faq-categorie-chip' + (categorie === actieveCategorie ? ' actief' : '');
+        chip.textContent = categorie;
+        chip.addEventListener('click', function() {
+          actieveCategorie = categorie;
+          toonCategorieChips();
+          pasFaqFilterToe();
+        });
+        faqCategorieenEl.appendChild(chip);
+      });
+    }
+
+    function pasFaqFilterToe() {
+      const zoekterm = faqZoekEl.value.toLowerCase();
+      const gefilterd = alleVragen.filter(function(v) {
+        const matchtZoekterm = v.vraag.toLowerCase().indexOf(zoekterm) !== -1;
+        const matchtCategorie = actieveCategorie === 'Alle' || v.categorie === actieveCategorie;
+        return matchtZoekterm && matchtCategorie;
+      });
+      toonFaqLijst(gefilterd);
+    }
+
+    function toonFaqLijst(vragen) {
+      faqLijstEl.innerHTML = '';
+
+      if (!vragen.length) {
+        faqLijstEl.innerHTML = '<div class="faq-melding">Geen vragen gevonden.</div>';
+        return;
+      }
+
+      vragen.forEach(function(vraagObj) {
+        const item = document.createElement('button');
+        item.className = 'faq-item';
+        item.textContent = vraagObj.vraag;
+        item.addEventListener('click', function() {
+          faqOverlayEl.classList.add('verborgen');
+          kiesFaqVraag(vraagObj);
+        });
+        faqLijstEl.appendChild(item);
+      });
+    }
+
+    function kiesFaqVraag(vraagObj) {
+      voegBerichtToe(vraagObj.vraag, 'gebruiker');
+      toonTypingIndicator();
+
+      appsScriptCall('haalAntwoordOpRij', [huidigeId, huidigeApparaatToken, vraagObj.rij])
+        .then(function(stap) {
+          verwijderTypingIndicator();
+          toonStap(stap);
+        })
+        .catch(function() {
+          verwijderTypingIndicator();
+          voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+        });
+    }
+
+    const routeMenuItemEl = document.getElementById('routeMenuItem');
+    const routeOverlayEl = document.getElementById('routeOverlay');
+    const routeSluitenEl = document.getElementById('routeSluiten');
+    const routeInputEl = document.getElementById('routeInput');
+    const routeZoekBtnEl = document.getElementById('routeZoekBtn');
+    const routeResultaatEl = document.getElementById('routeResultaat');
+    const routeOntgrendelOverlayEl = document.getElementById('routeOntgrendelOverlay');
+    const routeOntgrendelPopupInvoerEl = document.getElementById('routeOntgrendelPopupInvoer');
+    const routeOntgrendelPopupFoutEl = document.getElementById('routeOntgrendelPopupFout');
+    const routeOntgrendelAnnulerenEl = document.getElementById('routeOntgrendelAnnuleren');
+    const routeOntgrendelBevestigenEl = document.getElementById('routeOntgrendelBevestigen');
+
+    let routeWachtendRouteNummer = null;
+    const routeVergrootOverlayEl = document.getElementById('routeVergrootOverlay');
+    const routeVergrootSluitenEl = document.getElementById('routeVergrootSluiten');
+    const routeVergrootContainerEl = document.getElementById('routeVergrootContainer');
+    const routeVergrootVorigeEl = document.getElementById('routeVergrootVorige');
+    const routeVergrootVolgendeEl = document.getElementById('routeVergrootVolgende');
+    const routeVergrootLabelEl = document.getElementById('routeVergrootLabel');
+    const VERGROOT_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>';
+
+    let routeZoekToken = 0;
+    let routeCanvasLijst = [];
+    let routeHuidigePaginaIndex = 0;
+    let routeVernieuwWeergave = null;
+
+    let vergrootBasisBreedte = 0;
+    let vergrootSchaal = 1;
+    const VERGROOT_MIN_SCHAAL = 1;
+    const VERGROOT_MAX_SCHAAL = 4;
+
+    function pasVergrootZoomToe(ankerClientX, ankerClientY) {
+      const img = routeVergrootContainerEl.querySelector('img');
+      if (!img || !vergrootBasisBreedte) return;
+
+      const containerRect = routeVergrootContainerEl.getBoundingClientRect();
+      const ankerX = (ankerClientX !== undefined) ? ankerClientX : containerRect.left + containerRect.width / 2;
+      const ankerY = (ankerClientY !== undefined) ? ankerClientY : containerRect.top + containerRect.height / 2;
+
+      const oudeImgRect = img.getBoundingClientRect();
+      const fracX = oudeImgRect.width ? Math.min(1, Math.max(0, (ankerX - oudeImgRect.left) / oudeImgRect.width)) : 0.5;
+      const fracY = oudeImgRect.height ? Math.min(1, Math.max(0, (ankerY - oudeImgRect.top) / oudeImgRect.height)) : 0.5;
+
+      img.style.width = (vergrootBasisBreedte * vergrootSchaal) + 'px';
+
+      const nieuweImgRect = img.getBoundingClientRect();
+      const verschuivingX = (nieuweImgRect.left + fracX * nieuweImgRect.width) - ankerX;
+      const verschuivingY = (nieuweImgRect.top + fracY * nieuweImgRect.height) - ankerY;
+      routeVergrootContainerEl.scrollLeft += verschuivingX;
+      routeVergrootContainerEl.scrollTop += verschuivingY;
+    }
+
+    routeVergrootContainerEl.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      const stap = e.deltaY > 0 ? -0.2 : 0.2;
+      vergrootSchaal = Math.min(VERGROOT_MAX_SCHAAL, Math.max(VERGROOT_MIN_SCHAAL, vergrootSchaal + stap));
+      pasVergrootZoomToe(e.clientX, e.clientY);
+    }, { passive: false });
+
+    let vergrootPinchStartAfstand = null;
+    let vergrootPinchStartSchaal = 1;
+
+    function afstandTussenTouches(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    routeVergrootContainerEl.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        vergrootPinchStartAfstand = afstandTussenTouches(e.touches);
+        vergrootPinchStartSchaal = vergrootSchaal;
+      }
+    }, { passive: true });
+
+    routeVergrootContainerEl.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2 && vergrootPinchStartAfstand) {
+        e.preventDefault();
+        const factor = afstandTussenTouches(e.touches) / vergrootPinchStartAfstand;
+        vergrootSchaal = Math.min(VERGROOT_MAX_SCHAAL, Math.max(VERGROOT_MIN_SCHAAL, vergrootPinchStartSchaal * factor));
+        const middenX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const middenY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        pasVergrootZoomToe(middenX, middenY);
+      }
+    }, { passive: false });
+
+    routeVergrootContainerEl.addEventListener('touchend', function(e) {
+      if (e.touches.length < 2) vergrootPinchStartAfstand = null;
+    });
+
+    routeVergrootSluitenEl.addEventListener('click', function() {
+      routeVergrootOverlayEl.classList.add('verborgen');
+      routeVergrootContainerEl.innerHTML = '';
+    });
+
+    routeVergrootVorigeEl.addEventListener('click', function() {
+      routeHuidigePaginaIndex--;
+      if (routeVernieuwWeergave) routeVernieuwWeergave();
+    });
+    routeVergrootVolgendeEl.addEventListener('click', function() {
+      routeHuidigePaginaIndex++;
+      if (routeVernieuwWeergave) routeVernieuwWeergave();
+    });
+
+    routeMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+      routeOverlayEl.classList.remove('verborgen');
+      routeInputEl.value = '';
+      routeResultaatEl.innerHTML = '';
+      routeZoekToken++;
+    });
+
+    routeSluitenEl.addEventListener('click', function() {
+      routeOverlayEl.classList.add('verborgen');
+      routeVergrootOverlayEl.classList.add('verborgen');
+      routeVergrootContainerEl.innerHTML = '';
+      verbergRouteOntgrendelPopup();
+      routeZoekToken++;
+    });
+
+    function toonRouteOntgrendelPopup(routenummer) {
+      routeWachtendRouteNummer = routenummer;
+      routeOntgrendelPopupInvoerEl.value = '';
+      routeOntgrendelPopupFoutEl.textContent = '';
+      routeOntgrendelPopupFoutEl.style.color = 'var(--danger)';
+      routeOntgrendelBevestigenEl.disabled = false;
+      routeOntgrendelOverlayEl.classList.remove('verborgen');
+      routeOntgrendelPopupInvoerEl.focus();
+    }
+
+    function verbergRouteOntgrendelPopup() {
+      routeOntgrendelOverlayEl.classList.add('verborgen');
+      routeOntgrendelBevestigenEl.disabled = false;
+      routeWachtendRouteNummer = null;
+    }
+
+    routeOntgrendelAnnulerenEl.addEventListener('click', function() {
+      verbergRouteOntgrendelPopup();
+      routeResultaatEl.innerHTML = '<div class="route-melding">Geen route gevonden voor vandaag.</div>';
+    });
+
+    routeOntgrendelBevestigenEl.addEventListener('click', function() {
+      const code = routeOntgrendelPopupInvoerEl.value.trim();
+      if (!code || !routeWachtendRouteNummer) return;
+      routeOntgrendelBevestigenEl.disabled = true;
+      routeOntgrendelPopupFoutEl.style.color = 'var(--ink-muted)';
+      routeOntgrendelPopupFoutEl.textContent = 'Route wordt geladen, dit kan even duren...';
+      zoekRoute(routeWachtendRouteNummer, code);
+    });
+
+    routeOntgrendelPopupInvoerEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') routeOntgrendelBevestigenEl.click();
+    });
+
+    routeZoekBtnEl.addEventListener('click', function() { zoekRoute(routeInputEl.value); });
+    routeInputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') zoekRoute(routeInputEl.value);
+    });
+
+    const ROUTE_ZOEK_TIMEOUT_MS = 25000;
+    const VOLLEDIG_ROUTENUMMER_PATROON = /^[A-Za-z]{3}(AM|PM)-\d{6}-\d+$/i;
+
+    function zoekRoute(waarde, ontgrendelcode) {
+      const getrimd = (waarde || '').trim();
+      if (!getrimd) return;
+
+      if (!VOLLEDIG_ROUTENUMMER_PATROON.test(getrimd)) {
+        routeResultaatEl.innerHTML = '<div class="route-melding">Vul het volledige routenummer in, bijv. DUIAM-260712-6183.</div>';
+        return;
+      }
+
+      const ditToken = ++routeZoekToken;
+      routeResultaatEl.innerHTML = '<div class="route-melding">Bezig met zoeken...</div>';
+
+      const timeoutId = setTimeout(function() {
+        if (ditToken !== routeZoekToken) return;
+        routeOntgrendelBevestigenEl.disabled = false;
+        routeResultaatEl.innerHTML = '<div class="route-melding">Dit duurt te lang. Probeer het nog eens, of neem contact op met de HUB als dit blijft gebeuren.</div>';
+      }, ROUTE_ZOEK_TIMEOUT_MS);
+
+      appsScriptCall('haalRoutePdf', [huidigeId, huidigeApparaatToken, getrimd, ontgrendelcode || ''])
+        .then(function(resultaat) {
+          clearTimeout(timeoutId);
+          if (ditToken !== routeZoekToken) return;
+
+          if (resultaat && resultaat.ongeldigeSessie) {
+            verbergRouteOntgrendelPopup();
+            routeOverlayEl.classList.add('verborgen');
+            toonSessieVerlopen();
+            return;
+          }
+
+          if (resultaat && resultaat.vanAndereDag) {
+            if (resultaat.fout) {
+              routeOntgrendelBevestigenEl.disabled = false;
+              routeOntgrendelPopupFoutEl.style.color = 'var(--danger)';
+              routeOntgrendelPopupFoutEl.textContent = resultaat.fout;
+              return;
+            }
+            toonRouteOntgrendelPopup(getrimd);
+            return;
+          }
+
+          verbergRouteOntgrendelPopup();
+
+          if (!resultaat || !resultaat.gevonden) {
+            if (resultaat && resultaat.verlopen) {
+              routeResultaatEl.innerHTML = '<div class="route-melding">De ritlijst is na 23:30 uur niet meer beschikbaar, net als de papieren versie na je dienst.</div>';
+              return;
+            }
+            if (resultaat && resultaat.fout) {
+              routeResultaatEl.innerHTML = '<div class="route-melding">Fout: ' + resultaat.fout + '</div>';
+              return;
+            }
+            if (resultaat && resultaat.suggesties && resultaat.suggesties.length) {
+              toonRouteSuggesties(resultaat.suggesties);
+              return;
+            }
+            const meerdere = resultaat && resultaat.aantal > 1;
+            routeResultaatEl.innerHTML = '<div class="route-melding">' +
+              (meerdere ? 'Meerdere routes gevonden, neem contact op met de HUB.' : 'Geen route gevonden voor vandaag.') +
+              '</div>';
+            return;
+          }
+          toonRoutePdf(resultaat.pdfBase64, resultaat.bestandsNaam);
+        })
+        .catch(function() {
+          clearTimeout(timeoutId);
+          if (ditToken !== routeZoekToken) return;
+          routeOntgrendelBevestigenEl.disabled = false;
+          routeResultaatEl.innerHTML = '<div class="route-melding">Er ging iets mis, probeer het nog eens.</div>';
+        });
+    }
+
+    function toonRouteSuggesties(suggesties) {
+      routeResultaatEl.innerHTML = '<div class="route-melding">Geen route gevonden. Bedoel je een van deze?</div>';
+
+      suggesties.forEach(function(suggestie) {
+        const btn = document.createElement('button');
+        btn.className = 'route-btn-secundair route-suggestie-btn';
+        btn.textContent = suggestie;
+        btn.addEventListener('click', function() {
+          routeInputEl.value = suggestie;
+          zoekRoute(suggestie);
+        });
+        routeResultaatEl.appendChild(btn);
+      });
+    }
+
+    const AANTAL_TOEGESTANE_PAGINAS = 2;
+
+    async function toonRoutePdf(pdfBase64, bestandsNaam) {
+      routeResultaatEl.innerHTML = '<div class="route-melding">Ritlijst wordt geladen...</div>';
+
+      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+
+      const ruweData = atob(pdfBase64);
+      const bytes = new Uint8Array(ruweData.length);
+      for (let i = 0; i < ruweData.length; i++) bytes[i] = ruweData.charCodeAt(i);
+
+      try {
+        const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+        routeResultaatEl.innerHTML = '';
+
+        const teTonenPaginas = Math.min(AANTAL_TOEGESTANE_PAGINAS, pdf.numPages);
+        const canvasLijst = [];
+        for (let paginaNummer = 1; paginaNummer <= teTonenPaginas; paginaNummer++) {
+          canvasLijst.push(await renderPagina(pdf, paginaNummer));
+        }
+
+        toonRoutePager(canvasLijst, bestandsNaam);
+      } catch (e) {
+        routeResultaatEl.innerHTML = '<div class="route-melding">Kon de ritlijst niet openen.</div>';
+      }
+    }
+
+    async function renderPagina(pdf, paginaNummer) {
+      const pagina = await pdf.getPage(paginaNummer);
+      const viewport = pagina.getViewport({ scale: 1.5 });
+
+      const canvas = document.createElement('canvas');
+      canvas.className = 'route-pdf-pagina';
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await pagina.render({ canvasContext: canvas.getContext('2d'), viewport: viewport }).promise;
+
+      return canvas;
+    }
+
+    function toonRoutePager(canvasLijst, bestandsNaam) {
+      routeCanvasLijst = canvasLijst;
+      routeHuidigePaginaIndex = 0;
+
+      const navEl = document.createElement('div');
+      navEl.className = 'route-pagina-nav';
+
+      const vorigeBtnEl = document.createElement('button');
+      vorigeBtnEl.className = 'route-pagina-nav-btn';
+      vorigeBtnEl.textContent = '‹';
+      vorigeBtnEl.setAttribute('aria-label', 'Vorige pagina');
+
+      const labelEl = document.createElement('span');
+      labelEl.className = 'route-pagina-label';
+
+      const volgendeBtnEl = document.createElement('button');
+      volgendeBtnEl.className = 'route-pagina-nav-btn';
+      volgendeBtnEl.textContent = '›';
+      volgendeBtnEl.setAttribute('aria-label', 'Volgende pagina');
+
+      const vergrootBtnEl = document.createElement('button');
+      vergrootBtnEl.className = 'route-vergroot-knop';
+      vergrootBtnEl.setAttribute('aria-label', 'Vergroten');
+      vergrootBtnEl.innerHTML = VERGROOT_SVG;
+
+      navEl.appendChild(vorigeBtnEl);
+      navEl.appendChild(labelEl);
+      navEl.appendChild(volgendeBtnEl);
+      navEl.appendChild(vergrootBtnEl);
+
+      const paginaContainerEl = document.createElement('div');
+      paginaContainerEl.className = 'route-pagina-container';
+
+      routeVernieuwWeergave = function() {
+        const label = 'Pagina ' + (routeHuidigePaginaIndex + 1) + ' van ' + routeCanvasLijst.length;
+        const isEerste = routeHuidigePaginaIndex === 0;
+        const isLaatste = routeHuidigePaginaIndex === routeCanvasLijst.length - 1;
+
+        paginaContainerEl.innerHTML = '';
+        paginaContainerEl.appendChild(routeCanvasLijst[routeHuidigePaginaIndex]);
+        labelEl.textContent = label;
+        vorigeBtnEl.disabled = isEerste;
+        volgendeBtnEl.disabled = isLaatste;
+
+        if (!routeVergrootOverlayEl.classList.contains('verborgen')) {
+          routeVergrootContainerEl.innerHTML = '';
+          vergrootSchaal = 1;
+          vergrootBasisBreedte = 0;
+
+          const img = document.createElement('img');
+          img.addEventListener('load', function() {
+            const containerBreedte = routeVergrootContainerEl.clientWidth;
+            const containerHoogte = routeVergrootContainerEl.clientHeight;
+            const beeldRatio = img.naturalWidth / img.naturalHeight;
+            vergrootBasisBreedte = (beeldRatio > containerBreedte / containerHoogte)
+              ? containerBreedte
+              : containerHoogte * beeldRatio;
+            pasVergrootZoomToe();
+          });
+          img.src = routeCanvasLijst[routeHuidigePaginaIndex].toDataURL('image/png');
+          routeVergrootContainerEl.appendChild(img);
+          routeVergrootLabelEl.textContent = label;
+          routeVergrootVorigeEl.disabled = isEerste;
+          routeVergrootVolgendeEl.disabled = isLaatste;
+        }
+      };
+
+      vorigeBtnEl.addEventListener('click', function() {
+        routeHuidigePaginaIndex--;
+        routeVernieuwWeergave();
+      });
+      volgendeBtnEl.addEventListener('click', function() {
+        routeHuidigePaginaIndex++;
+        routeVernieuwWeergave();
+      });
+      vergrootBtnEl.addEventListener('click', function() {
+        routeVergrootOverlayEl.classList.remove('verborgen');
+        routeVernieuwWeergave();
+      });
+
+      routeResultaatEl.appendChild(navEl);
+      routeResultaatEl.appendChild(paginaContainerEl);
+      routeVernieuwWeergave();
+
+      const downloadBtnEl = document.createElement('button');
+      downloadBtnEl.id = 'routeDownloadBtn';
+      downloadBtnEl.className = 'route-btn';
+      downloadBtnEl.textContent = 'Download ritlijst';
+      downloadBtnEl.addEventListener('click', function() {
+        downloadBtnEl.disabled = true;
+        bouwEnDownloadPdf(routeCanvasLijst, bestandsNaam).finally(function() {
+          downloadBtnEl.disabled = false;
+        });
+      });
+      routeResultaatEl.appendChild(downloadBtnEl);
+    }
+
+    async function bouwEnDownloadPdf(canvasLijst, bestandsNaam) {
+      const nieuwDoc = await PDFLib.PDFDocument.create();
+
+      for (const canvas of canvasLijst) {
+        const pngBytes = await fetch(canvas.toDataURL('image/png')).then(function(r) { return r.arrayBuffer(); });
+        const pngImage = await nieuwDoc.embedPng(pngBytes);
+        const paginaEl = nieuwDoc.addPage([canvas.width, canvas.height]);
+        paginaEl.drawImage(pngImage, { x: 0, y: 0, width: canvas.width, height: canvas.height });
+      }
+
+      const pdfBytes = await nieuwDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const linkEl = document.createElement('a');
+      linkEl.href = url;
+      linkEl.download = bestandsNaam || 'ritlijst.pdf';
+      document.body.appendChild(linkEl);
+      linkEl.click();
+      document.body.removeChild(linkEl);
+      URL.revokeObjectURL(url);
+    }
+
+    function belHub(nummer) {
+      window.open('tel:' + nummer, '_blank');
+    }
+
+    HUB_NUMMERS.forEach(function(hub) {
+      const item = document.createElement('button');
+      item.className = 'bel-item';
+      item.textContent = hub.naam;
+      item.addEventListener('click', function() {
+        belMenuEl.classList.add('verborgen');
+        belHub(hub.nummer);
+      });
+      belMenuEl.appendChild(item);
+    });
+
+    belKnopEl.addEventListener('click', function(e) {
+      e.stopPropagation();
+
+      const eigenHub = huidigeHub
+        ? HUB_NUMMERS.find(function(hub) {
+            return hub.naam.trim().toLowerCase() === huidigeHub.trim().toLowerCase();
+          })
+        : null;
+
+      if (eigenHub) {
+        belHub(eigenHub.nummer);
+      } else {
+        belMenuEl.classList.toggle('verborgen');
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!belMenuEl.contains(e.target) && !belKnopEl.contains(e.target)) {
+        belMenuEl.classList.add('verborgen');
+      }
+    });
+
+    knopEl.addEventListener('click', verstuurVraag);
+    inputEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') verstuurVraag();
+    });
+  </script>
+</body>
+</html>
