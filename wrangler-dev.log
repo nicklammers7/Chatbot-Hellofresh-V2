@@ -26,3 +26,19 @@ Useful routes:
   GET http://127.0.0.1:8787/cdn-cgi/explorer/api/storage/kv/namespaces - KV namespaces
   GET http://127.0.0.1:8787/cdn-cgi/explorer/api/workers/durable_objects/namespaces - Durable Object namespaces
   GET http://127.0.0.1:8787/cdn-cgi/explorer/api/workflows - Workflows
+[wrangler:info] GET / 200 OK (17ms)
+[wrangler:info] GET /favicon.ico 404 Not Found (2ms)
+[wrangler:info] POST /api 200 OK (6551ms)
+[wrangler:info] GET / 200 OK (3ms)
+[wrangler:info] GET /favicon.ico 404 Not Found (4ms)
+[wrangler:info] POST /api 200 OK (6441ms)
+[wrangler:info] POST /api 200 OK (9ms)
+[wrangler:info] POST /api 200 OK (4ms)
+[wrangler:info] POST /api 200 OK (1013ms)
+[wrangler:info] POST /api 200 OK (7129ms)
+[wrangler:info] POST /api 200 OK (3ms)
+[wrangler:info] POST /api 200 OK (1006ms)
+[wrangler:info] POST /api 200 OK (3ms)
+[wrangler:info] POST /api 200 OK (1014ms)
+[wrangler:info] POST /api 200 OK (2ms)
+[wrangler:info] POST /api 200 OK (1011ms)
