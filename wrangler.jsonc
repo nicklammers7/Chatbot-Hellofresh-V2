@@ -20,6 +20,12 @@
 	],
 	"rules": [
 		{ "type": "Text", "globs": ["**/*.html"] }
+	],
+	"kv_namespaces": [
+		{
+			"binding": "CHATBOT_CACHE",
+			"id": "cbe7508daec44abca57278fb54c2baad"
+		}
 	]
 	/**
 	 * Smart Placement

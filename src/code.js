@@ -2,9 +2,16 @@ import INDEX_HTML from './index.html';
 
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVsc2KHocAkGb4slg768TRC93INuGNFHn3ITkuI6OJD9m1a0lV8Em204ktzVVTlJUGuA/exec";
 
-let faqCache = null;
-let lastCacheTime = 0;
-const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minuten bewaren
+// Twee cache-lagen:
+// - L1 (geheugen van déze Worker-instantie): bijna instant, maar verdwijnt
+//   zodra Cloudflare de instantie na inactiviteit laat "inslapen".
+// - L2 (Cloudflare KV, zie CHATBOT_CACHE-binding in wrangler.jsonc): iets
+//   trager (~10-20ms) maar overleeft dat inslapen wél - dus de eerste
+//   aanvraag na een tijdje stilte hoeft niet meer helemaal opnieuw naar
+//   Google Apps Script (en diens eigen, tragere opstart-overhead).
+let faqCacheGeheugen = null;
+const FAQ_CACHE_SECONDEN = 30 * 60; // 30 minuten
+const LOGIN_CACHE_SECONDEN = 10 * 60; // 10 minuten
 const TYP_VERTRAGING_MS = 1000; // 1 seconde vertraging voor "natuurlijk typen"
 
 export default {
@@ -24,38 +31,51 @@ export default {
         const actie = body.actie;
         const args = body.argumenten || [];
 
-        // 🚀 1. Inlog-check: alvast cache vullen op de achtergrond
+        // 🚀 1. INLOGGEN OP CLOUDFLARE - eerst de KV-cache proberen (zelfde
+        // idCode + token binnen 10 min = geen nieuwe aanroep naar Google nodig)
         if (actie === "checkInloggen") {
           const [idCode, apparaatToken] = args;
-          ctx.waitUntil(haalCacheOp(GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+          const loginSleutel = 'login_' + idCode + '_' + apparaatToken;
+
+          const gecachedLogin = await veiligKvGet(env, loginSleutel);
+          if (gecachedLogin) {
+            ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+            return jsonResponse(gecachedLogin);
+          }
+
+          const res = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: bodyText,
+          });
+          const json = await res.json();
+          ctx.waitUntil(veiligKvPut(env, loginSleutel, json, LOGIN_CACHE_SECONDEN));
+          ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+          return jsonResponse(json);
         }
 
-        // 🚀 2. FAQ-LIJST LADEN OP CLOUDFLARE (~20ms INSTANT!)
+        // 🚀 2. FAQ-LIJST LADEN OP CLOUDFLARE
         if (actie === "haalAlleVragen") {
           const [idCode, apparaatToken] = args;
-          const cacheData = await haalCacheOp(GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
 
           if (cacheData && cacheData.vragen) {
-            return new Response(JSON.stringify(cacheData), {
-              headers: { "Content-Type": "application/json" }
-            });
+            return jsonResponse(cacheData);
           }
         }
 
-        // 🚀 3. ZOEKOPDRACHT OP CLOUDFLARE (~1 sec)
+        // 🚀 3. ZOEKOPDRACHT OP CLOUDFLARE
         if (actie === "zoekAntwoord") {
           const [idCode, apparaatToken, vraagTekst] = args;
-          const cacheData = await haalCacheOp(GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
 
           if (cacheData && cacheData.vragen) {
             const match = vindBesteMatch(vraagTekst, cacheData.vragen);
-            
+
             // A. MATCH GEVONDEN!
             if (match) {
-              await new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
-              return new Response(JSON.stringify(match), {
-                headers: { "Content-Type": "application/json" }
-              });
+              await wachtNatuurlijk();
+              return jsonResponse(match);
             }
 
             // B. GÉÉN MATCH GEVONDEN -> Stuur vraag asynchroon naar Google (Log + Mail)
@@ -70,34 +90,23 @@ export default {
             // Bepaal slimme "bedoel je misschien..." suggesties uit de cache
             const suggesties = zoekSuggestiesInCache(cacheData.vragen, vraagTekst);
 
-            await new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
+            await wachtNatuurlijk();
 
             // Geef direct een geldig antwoordobject terug aan de frontend (geen crash!)
-            return new Response(JSON.stringify({ 
-              tekst: null, 
-              opties: [], 
-              suggesties: suggesties 
-            }), {
-              headers: { "Content-Type": "application/json" }
-            });
+            return jsonResponse({ tekst: null, opties: [], suggesties: suggesties });
           }
         }
 
         // 🚀 4. FAQ KLIK OP CLOUDFLARE
         if (actie === "haalAntwoordOpRij") {
           const [idCode, apparaatToken, rijNummer] = args;
-          const cacheData = await haalCacheOp(GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
 
           if (cacheData && cacheData.vragen) {
             const rijMatch = cacheData.vragen.find(v => Number(v.rij) === Number(rijNummer));
             if (rijMatch && !bevatPlaceholder(rijMatch.antwoord)) {
-              await new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
-              return new Response(JSON.stringify({
-                tekst: rijMatch.antwoord,
-                opties: rijMatch.opties || []
-              }), {
-                headers: { "Content-Type": "application/json" }
-              });
+              await wachtNatuurlijk();
+              return jsonResponse({ tekst: rijMatch.antwoord, opties: rijMatch.opties || [] });
             }
           }
         }
@@ -105,18 +114,13 @@ export default {
         // 🚀 5. KEUZEKNOP KLIK OP CLOUDFLARE
         if (actie === "haalStap") {
           const [idCode, apparaatToken, stapId] = args;
-          const cacheData = await haalCacheOp(GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
 
           if (cacheData && cacheData.vragen) {
             const stapMatch = cacheData.vragen.find(v => String(v.id).trim() === String(stapId).trim());
             if (stapMatch && !bevatPlaceholder(stapMatch.antwoord)) {
               await new Promise(resolve => setTimeout(resolve, 600));
-              return new Response(JSON.stringify({
-                tekst: stapMatch.antwoord,
-                opties: stapMatch.opties || []
-              }), {
-                headers: { "Content-Type": "application/json" }
-              });
+              return jsonResponse({ tekst: stapMatch.antwoord, opties: stapMatch.opties || [] });
             }
           }
         }
@@ -146,10 +150,41 @@ export default {
   }
 };
 
-async function haalCacheOp(scriptUrl, idCode, apparaatToken) {
-  const nu = Date.now();
-  if (faqCache && (nu - lastCacheTime < CACHE_DURATION_MS)) {
-    return faqCache;
+function jsonResponse(data) {
+  return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json" } });
+}
+
+function wachtNatuurlijk() {
+  return new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
+}
+
+// KV-lezen/schrijven altijd veilig afhandelen: als Cloudflare KV een keer
+// hapert, mag dat nooit de hele aanvraag laten crashen - dan wordt gewoon
+// (iets langzamer) rechtstreeks bij Google opgehaald.
+async function veiligKvGet(env, sleutel) {
+  try {
+    return await env.CHATBOT_CACHE.get(sleutel, { type: 'json' });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function veiligKvPut(env, sleutel, waarde, ttlSeconden) {
+  try {
+    await env.CHATBOT_CACHE.put(sleutel, JSON.stringify(waarde), { expirationTtl: ttlSeconden });
+  } catch (e) {}
+}
+
+// Eerst het geheugen van déze Worker-instantie proberen (instant), dan
+// Cloudflare KV (overleeft inactiviteit), en pas als beide leeg zijn de
+// echte, tragere aanroep naar Google Apps Script.
+async function haalCacheOp(env, scriptUrl, idCode, apparaatToken) {
+  if (faqCacheGeheugen) return faqCacheGeheugen;
+
+  const uitKv = await veiligKvGet(env, 'faq_cache');
+  if (uitKv) {
+    faqCacheGeheugen = uitKv;
+    return uitKv;
   }
 
   try {
@@ -161,12 +196,12 @@ async function haalCacheOp(scriptUrl, idCode, apparaatToken) {
     });
     const json = await res.json();
     if (json && json.vragen && json.vragen.length > 0) {
-      faqCache = json;
-      lastCacheTime = nu;
+      faqCacheGeheugen = json;
+      await veiligKvPut(env, 'faq_cache', json, FAQ_CACHE_SECONDEN);
     }
-    return faqCache;
+    return faqCacheGeheugen;
   } catch (e) {
-    return faqCache;
+    return faqCacheGeheugen;
   }
 }
 
