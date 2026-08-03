@@ -987,6 +987,11 @@
     const belKnopEl = document.getElementById('belKnop');
     const belMenuEl = document.getElementById('belMenu');
 
+    // Hulpfunctie voor een natuurlijke vertraging van 1 seconde (1000 ms)
+    const sleep = function(ms) {
+      return new Promise(function(resolve) { setTimeout(resolve, ms); });
+    };
+
     // --- Thema (licht/donker) ---
     const THEMA_KEY = 'hf_thema';
     const themaKnopEl = document.getElementById('themaKnop');
@@ -1375,8 +1380,11 @@
             voegBerichtToe(optie.tekst, 'gebruiker');
             toonTypingIndicator();
 
+            const startTijd = Date.now();
             appsScriptCall('haalStap', [huidigeId, huidigeApparaatToken, optie.id])
-              .then(function(volgendeStap) {
+              .then(async function(volgendeStap) {
+                const verstreken = Date.now() - startTijd;
+                if (verstreken < 1000) await sleep(1000 - verstreken);
                 verwijderTypingIndicator();
                 toonStap(volgendeStap);
               })
@@ -1423,8 +1431,14 @@
       knopEl.disabled = true;
       toonTypingIndicator();
 
+      const startTijd = Date.now();
+
       appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst])
-        .then(function(stap) {
+        .then(async function(stap) {
+          const verstreken = Date.now() - startTijd;
+          if (verstreken < 1000) {
+            await sleep(1000 - verstreken);
+          }
           verwijderTypingIndicator();
           toonStap(stap);
           inputEl.disabled = false;
@@ -1549,8 +1563,12 @@
       voegBerichtToe(vraagObj.vraag, 'gebruiker');
       toonTypingIndicator();
 
+      const startTijd = Date.now();
+
       appsScriptCall('haalAntwoordOpRij', [huidigeId, huidigeApparaatToken, vraagObj.rij])
-        .then(function(stap) {
+        .then(async function(stap) {
+          const verstreken = Date.now() - startTijd;
+          if (verstreken < 1000) await sleep(1000 - verstreken);
           verwijderTypingIndicator();
           toonStap(stap);
         })
