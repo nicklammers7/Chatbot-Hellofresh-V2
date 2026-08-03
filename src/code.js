@@ -49,12 +49,37 @@ export default {
 
           if (cacheData && cacheData.vragen) {
             const match = vindBesteMatch(vraagTekst, cacheData.vragen);
+            
+            // A. MATCH GEVONDEN!
             if (match) {
               await new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
               return new Response(JSON.stringify(match), {
                 headers: { "Content-Type": "application/json" }
               });
             }
+
+            // B. GÉÉN MATCH GEVONDEN -> Stuur vraag asynchroon naar Google (Log + Mail)
+            ctx.waitUntil(
+              fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: bodyText,
+              }).catch(err => console.error("Fout bij loggen naar Google:", err))
+            );
+
+            // Bepaal slimme "bedoel je misschien..." suggesties uit de cache
+            const suggesties = zoekSuggestiesInCache(cacheData.vragen, vraagTekst);
+
+            await new Promise(resolve => setTimeout(resolve, TYP_VERTRAGING_MS));
+
+            // Geef direct een geldig antwoordobject terug aan de frontend (geen crash!)
+            return new Response(JSON.stringify({ 
+              tekst: null, 
+              opties: [], 
+              suggesties: suggesties 
+            }), {
+              headers: { "Content-Type": "application/json" }
+            });
           }
         }
 
@@ -145,17 +170,10 @@ async function haalCacheOp(scriptUrl, idCode, apparaatToken) {
   }
 }
 
-// Een antwoord met een {{...}}-token (bijv. {{WEER}}, {{TIJD}}) moet altijd
-// vers door de echte backend (Code.gs) ingevuld worden - deze cache mag zo'n
-// antwoord nooit zelf teruggeven, anders krijgt de chauffeur een verouderd of
-// zelfs letterlijk "{{WEER}}" antwoord.
 function bevatPlaceholder(tekst) {
   return typeof tekst === 'string' && tekst.indexOf('{{') !== -1;
 }
 
-// Zelfde matchtTrefwoord-regel als in Code.gs: een meerdere-woorden-trefwoord
-// moet als hele zin voorkomen; een los woord moet exact overeenkomen, of het
-// trefwoord mag (vanaf 4 tekens) een prefix van het ingevoerde woord zijn.
 function matchtTrefwoord(trefwoord, invoerZin, invoerWoorden) {
   if (!trefwoord) return false;
   if (trefwoord.indexOf(' ') !== -1) {
@@ -176,11 +194,6 @@ function normaliseerWoorden(tekst) {
     .filter(Boolean);
 }
 
-// Spiegelt exact de matching-logica van zoekAntwoord() in Code.gs (inclusief
-// de "zwak trefwoord" (~) regel: die telt alleen mee als er in dezelfde rij
-// ook een sterk trefwoord matcht) - zodat een chauffeur nooit een ander
-// antwoord krijgt afhankelijk van welke route (Cloudflare-cache of de echte
-// backend) toevallig de vraag afhandelt.
 function vindBesteMatch(vraagTekst, vragenLijst) {
   if (!vraagTekst || !vragenLijst) return null;
 
@@ -188,7 +201,7 @@ function vindBesteMatch(vraagTekst, vragenLijst) {
 
   const exacteMatch = vragenLijst.find(v => v.vraag && v.vraag.toLowerCase().trim().replace(/\s+/g, ' ') === schoneInvoerZin);
   if (exacteMatch) {
-    if (bevatPlaceholder(exacteMatch.antwoord)) return null; // laat de echte backend dit afhandelen
+    if (bevatPlaceholder(exacteMatch.antwoord)) return null;
     return { tekst: exacteMatch.antwoord, opties: exacteMatch.opties || [] };
   }
 
@@ -220,9 +233,48 @@ function vindBesteMatch(vraagTekst, vragenLijst) {
   }
 
   if (besteVraag && besteScore >= 1) {
-    if (bevatPlaceholder(besteVraag.antwoord)) return null; // idem
+    if (bevatPlaceholder(besteVraag.antwoord)) return null;
     return { tekst: besteVraag.antwoord, opties: besteVraag.opties || [] };
   }
 
   return null;
+}
+
+const NL_STOPWOORDEN = [
+  'de', 'het', 'een', 'en', 'of', 'maar', 'want', 'dus', 'als', 'dan',
+  'dat', 'die', 'deze', 'dit', 'er', 'hier', 'daar', 'waar', 'wat', 'wie',
+  'hoe', 'wanneer', 'waarom', 'welke', 'ik', 'jij', 'je', 'u', 'hij', 'zij',
+  'ze', 'wij', 'we', 'jullie', 'mij', 'me', 'hem', 'haar', 'ons', 'hun',
+  'mijn', 'jouw', 'onze', 'niet', 'geen', 'ook', 'al', 'nog', 'wel', 'te',
+  'om', 'van', 'voor', 'met', 'op', 'in', 'aan', 'naar', 'uit', 'over',
+  'onder', 'tussen', 'door', 'bij', 'zonder', 'tot', 'na', 'tijdens',
+  'is', 'ben', 'bent', 'zijn', 'was', 'waren', 'wordt', 'worden', 'werd',
+  'heeft', 'hebben', 'had', 'hadden', 'moet', 'moeten', 'mag', 'mogen',
+  'kan', 'kunnen', 'wil', 'willen', 'zou', 'zullen', 'gaat', 'gaan'
+];
+
+function zoekSuggestiesInCache(vragenLijst, vraagTekst) {
+  if (!vragenLijst || !vraagTekst) return [];
+
+  const invoerWoorden = normaliseerWoorden(vraagTekst);
+  const betekenisvolleInvoerWoorden = invoerWoorden.filter(w => NL_STOPWOORDEN.indexOf(w) === -1);
+
+  const kandidaten = [];
+
+  vragenLijst.forEach(function(item) {
+    if (!item.vraag) return;
+
+    const overlap = normaliseerWoorden(item.vraag).filter(function(woord) {
+      return NL_STOPWOORDEN.indexOf(woord) === -1 && betekenisvolleInvoerWoorden.indexOf(woord) !== -1;
+    }).length;
+
+    if (overlap > 0) {
+      kandidaten.push({ vraag: item.vraag, rij: item.rij, overlap: overlap });
+    }
+  });
+
+  return kandidaten
+    .sort((a, b) => b.overlap - a.overlap)
+    .slice(0, 2)
+    .map(k => ({ vraag: k.vraag, rij: k.rij }));
 }
