@@ -1176,10 +1176,31 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ actie: actie, argumenten: argumenten || [] })
-      }).then(function(response) { 
-        if (!response.ok) throw new Error('Netwerkfout');
-        return response.json(); 
+      }).then(function(response) {
+        if (!response.ok) {
+          // Bij een timeout/traag-antwoord (zie fetchAppsScriptJson in
+          // code.js) stuurt de Worker "traag: true" mee - die info op de
+          // fout zelf meegeven, zodat aanroepers een vriendelijkere melding
+          // kunnen tonen dan bij een echte, onherstelbare fout.
+          return response.json().catch(function() { return null; }).then(function(body) {
+            const fout = new Error((body && body.error) || 'Netwerkfout');
+            fout.traag = !!(body && body.traag);
+            throw fout;
+          });
+        }
+        return response.json();
       });
+    }
+
+    // Standaardtekst voor een mislukte server-aanroep - iets geruststellender
+    // formuleren als het om een trage/tijdelijke hapering ging (zie
+    // appsScriptCall hierboven), waarbij nog een keer proberen doorgaans
+    // gewoon werkt.
+    function foutmeldingVoor(fout, standaardTekst) {
+      if (fout && fout.traag) {
+        return 'De verbinding was even traag, probeer het nogmaals.';
+      }
+      return standaardTekst;
     }
 
     let huidigeId = null;
@@ -1360,11 +1381,11 @@
             toonLogin('Ongeldige ID-code, probeer het nogmaals.');
           }
         })
-        .catch(function() {
+        .catch(function(fout) {
           loginBtnEl.disabled = false;
           loginBtnTekstEl.textContent = 'Inloggen';
           loginSpinnerEl.classList.add('verborgen');
-          toonLogin('Er ging iets mis, probeer het nogmaals.');
+          toonLogin(foutmeldingVoor(fout, 'Er ging iets mis, probeer het nogmaals.'));
         });
     });
 
@@ -1401,11 +1422,11 @@
             verificatieResultaat.hub || null
           );
         })
-        .catch(function() {
+        .catch(function(fout) {
           verificatieBtnEl.disabled = false;
           verificatieBtnTekstEl.textContent = 'Bevestigen';
           verificatieSpinnerEl.classList.add('verborgen');
-          verificatieFoutEl.textContent = 'Er ging iets mis, probeer het nogmaals.';
+          verificatieFoutEl.textContent = foutmeldingVoor(fout, 'Er ging iets mis, probeer het nogmaals.');
         });
     });
 
