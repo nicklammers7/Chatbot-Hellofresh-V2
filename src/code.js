@@ -11,8 +11,46 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVsc2KHocAkG
 //   Google Apps Script (en diens eigen, tragere opstart-overhead).
 let faqCacheGeheugen = null;
 const FAQ_CACHE_SECONDEN = 30 * 60; // 30 minuten
-const LOGIN_CACHE_SECONDEN = 10 * 60; // 10 minuten
+// Een vertrouwd apparaat blijft sowieso tot het einde van de dag geldig (zie
+// COL_CHAUFFEUR_APPARAAT_GELDIG_TOT in Code.gs), dus 6 uur cachen levert geen
+// verouderde inlogstatus op en voorkomt dat dezelfde chauffeur meerdere keren
+// per dienst de trage Apps Script-aanroep raakt.
+const LOGIN_CACHE_SECONDEN = 6 * 60 * 60; // 6 uur
 const TYP_VERTRAGING_MS = 1000; // 1 seconde vertraging voor "natuurlijk typen"
+
+// Apps Script kan bij een "koude start" (een tijdje niet gebruikt) 5-8+
+// seconden nodig hebben om te antwoorden. Zonder tijdslimiet zou de chauffeur
+// onbeperkt kunnen blijven wachten; met een tweede, snelle nieuwe poging
+// herstelt een kortstondige hapering (netwerk, quotum-piek) zichzelf meestal
+// zonder dat de chauffeur er iets van merkt.
+const APPS_SCRIPT_TIMEOUT_MS = 15000;
+const APPS_SCRIPT_MAX_POGINGEN = 2;
+
+async function fetchMetTimeout(url, opties, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, Object.assign({}, opties, { signal: controller.signal }));
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Doet de aanroep naar Google Apps Script, en probeert het bij een fout of
+// timeout één keer opnieuw voordat de fout echt wordt doorgegeven.
+async function fetchAppsScriptJson(url, opties) {
+  let laatsteFout;
+  for (let poging = 1; poging <= APPS_SCRIPT_MAX_POGINGEN; poging++) {
+    try {
+      const res = await fetchMetTimeout(url, opties, APPS_SCRIPT_TIMEOUT_MS);
+      if (!res.ok) throw new Error('Apps Script gaf status ' + res.status);
+      return await res.json();
+    } catch (e) {
+      laatsteFout = e;
+    }
+  }
+  throw laatsteFout;
+}
 
 export default {
   async fetch(request, env, ctx) {
@@ -49,12 +87,11 @@ export default {
             return jsonResponse(gecachedLogin);
           }
 
-          const res = await fetch(GOOGLE_SCRIPT_URL, {
+          const json = await fetchAppsScriptJson(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: bodyText,
           });
-          const json = await res.json();
           ctx.waitUntil(veiligKvPut(env, loginSleutel, json, LOGIN_CACHE_SECONDEN));
           ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
           return jsonResponse(json);
@@ -132,20 +169,18 @@ export default {
         }
 
         // Overige verzoeken (zoals PDF's of verificatie) doorsturen naar Google Apps Script
-        const res = await fetch(GOOGLE_SCRIPT_URL, {
+        const json = await fetchAppsScriptJson(GOOGLE_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: bodyText,
         });
-
-        const responseText = await res.text();
-        return new Response(responseText, {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        });
+        return jsonResponse(json);
 
       } catch (err) {
-        return new Response(JSON.stringify({ error: err.message }), {
+        // "traag: true" laat de frontend straks (indien gewenst) een minder
+        // alarmerende melding tonen dan bij een echte, onherstelbare fout.
+        const traag = err && err.name === 'AbortError';
+        return new Response(JSON.stringify({ error: err.message, traag: traag }), {
           status: 500,
           headers: { "Content-Type": "application/json" },
         });
@@ -195,12 +230,11 @@ async function haalCacheOp(env, scriptUrl, idCode, apparaatToken) {
 
   try {
     const payload = JSON.stringify({ actie: "haalAlleVragen", argumenten: [idCode, apparaatToken] });
-    const res = await fetch(scriptUrl, {
+    const json = await fetchAppsScriptJson(scriptUrl, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: payload,
     });
-    const json = await res.json();
     if (json && json.vragen && json.vragen.length > 0) {
       faqCacheGeheugen = json;
       await veiligKvPut(env, 'faq_cache', json, FAQ_CACHE_SECONDEN);
