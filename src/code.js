@@ -11,6 +11,11 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVsc2KHocAkG
 //   Google Apps Script (en diens eigen, tragere opstart-overhead).
 let faqCacheGeheugen = null;
 const FAQ_CACHE_SECONDEN = 30 * 60; // 30 minuten
+let chauffeursCacheGeheugen = null;
+// Kort genoeg dat een net gedeactiveerde chauffeur niet te lang "actief" kan
+// blijven lijken bij Cloudflare, lang genoeg om de meeste logins (van
+// chauffeurs zonder 2FA-plicht) te versnellen.
+const CHAUFFEURS_CACHE_SECONDEN = 10 * 60; // 10 minuten
 // Een vertrouwd apparaat blijft sowieso tot het einde van de dag geldig (zie
 // COL_CHAUFFEUR_APPARAAT_GELDIG_TOT in Code.gs), dus 6 uur cachen levert geen
 // verouderde inlogstatus op en voorkomt dat dezelfde chauffeur meerdere keren
@@ -52,6 +57,41 @@ async function fetchAppsScriptJson(url, opties) {
   throw laatsteFout;
 }
 
+// Bij de allereerste (nog niet gecachete) inlog-check racen we na een korte
+// vertraging een tweede, identieke aanroep tegen de eerste aan - wie het
+// eerst antwoordt "wint". Dit vangt vooral het geval op waarin Apps Script
+// net koud is gestart en de eerste aanroep traag op gang komt, zonder dat de
+// chauffeur eerst een volle timeout + herhaling ná elkaar hoeft af te
+// wachten. Alleen veilig voor aanroepen zonder bijwerkingen (zoals
+// checkInloggen) - NIET gebruiken voor bijv. verstuurVerificatiecode, want
+// dan zouden er per ongeluk 2 verschillende codes gemaild kunnen worden.
+const INLOG_RACE_VERTRAGING_MS = 2000;
+
+function vertraagdeAanroep(url, opties, vertragingMs) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      fetchAppsScriptJson(url, opties).then(resolve, reject);
+    }, vertragingMs);
+  });
+}
+
+// Start de normale aanroep meteen, en - als die na INLOG_RACE_VERTRAGING_MS
+// nog niet klaar is - een tweede erbovenop; wie het eerst antwoordt wint.
+// Faalt pas als ALLEBEI mislukken (Promise.any-gedrag).
+async function fetchAppsScriptJsonMetRace(url, opties) {
+  try {
+    return await Promise.any([
+      fetchAppsScriptJson(url, opties),
+      vertraagdeAanroep(url, opties, INLOG_RACE_VERTRAGING_MS),
+    ]);
+  } catch (e) {
+    // Promise.any gooit een AggregateError met alle onderliggende fouten
+    // erin; we geven de eerste door zodat de bestaande foutafhandeling
+    // (o.a. de "traag"-detectie) er gewoon op kan blijven werken.
+    throw (e && e.errors && e.errors[0]) || e;
+  }
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -87,7 +127,32 @@ export default {
             return jsonResponse(gecachedLogin);
           }
 
-          const json = await fetchAppsScriptJson(GOOGLE_SCRIPT_URL, {
+          // Voor chauffeurs zonder 2FA-plicht (dus buiten VERIFICATIE_TEST_IDS)
+          // hangt "geldig ingelogd" niet af van een token-check in Apps
+          // Script (zie isVertrouwdApparaat daar) - voor hén kunnen we het
+          // hele antwoord dus lokaal samenstellen uit de gecachete
+          // chauffeurslijst, zonder Apps Script te hoeven raken. Voor
+          // chauffeurs die wél 2FA nodig hebben (nu alleen het testaccount,
+          // straks iedereen) blijft de echte, per-toestel tokencheck via
+          // Apps Script lopen - die slaan we hier bewust niet over.
+          const chauffeursData = await haalChauffeursCacheOp(env, GOOGLE_SCRIPT_URL);
+          if (chauffeursData && chauffeursData.chauffeurs) {
+            const genormaliseerdId = String(idCode || '').trim().toLowerCase();
+            const chauffeur = chauffeursData.chauffeurs.find(c => c.id === genormaliseerdId);
+            if (chauffeur && !chauffeur.vereistVerificatie) {
+              const lokaalJson = {
+                status: 'ok',
+                geldig: true,
+                voornaam: chauffeur.voornaam,
+                hub: chauffeur.hub,
+              };
+              ctx.waitUntil(veiligKvPut(env, loginSleutel, lokaalJson, LOGIN_CACHE_SECONDEN));
+              ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+              return jsonResponse(lokaalJson);
+            }
+          }
+
+          const json = await fetchAppsScriptJsonMetRace(GOOGLE_SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: bodyText,
@@ -242,6 +307,35 @@ async function haalCacheOp(env, scriptUrl, idCode, apparaatToken) {
     return faqCacheGeheugen;
   } catch (e) {
     return faqCacheGeheugen;
+  }
+}
+
+// Zelfde patroon als haalCacheOp hierboven, maar dan voor de lichte
+// chauffeurslijst (id/voornaam/hub/vereistVerificatie) waarmee checkInloggen
+// voor niet-2FA-chauffeurs lokaal beantwoord kan worden zonder Apps Script.
+async function haalChauffeursCacheOp(env, scriptUrl) {
+  if (chauffeursCacheGeheugen) return chauffeursCacheGeheugen;
+
+  const uitKv = await veiligKvGet(env, 'chauffeurs_cache');
+  if (uitKv) {
+    chauffeursCacheGeheugen = uitKv;
+    return uitKv;
+  }
+
+  try {
+    const payload = JSON.stringify({ actie: "haalActieveChauffeurs", argumenten: [] });
+    const json = await fetchAppsScriptJson(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: payload,
+    });
+    if (json && json.chauffeurs && json.chauffeurs.length > 0) {
+      chauffeursCacheGeheugen = json;
+      await veiligKvPut(env, 'chauffeurs_cache', json, CHAUFFEURS_CACHE_SECONDEN);
+    }
+    return chauffeursCacheGeheugen;
+  } catch (e) {
+    return chauffeursCacheGeheugen;
   }
 }
 
