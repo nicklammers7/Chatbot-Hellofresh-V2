@@ -19,8 +19,14 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/" || url.pathname === "/index.html") {
+      // Nooit cachen: zonder dit kunnen browsers (en soms Cloudflare's eigen
+      // edge-cache) een oude versie van de pagina blijven tonen na een
+      // nieuwe deploy, ook al staat de nieuwste code al live.
       return new Response(INDEX_HTML, {
-        headers: { "Content-Type": "text/html; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
       });
     }
 

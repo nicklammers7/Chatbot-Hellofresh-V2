@@ -601,7 +601,7 @@
       color: var(--pine);
       border: 1px solid var(--pine);
     }
-    #routeOntgrendelOverlay {
+    #routeOntgrendelOverlay, #uitloggenBevestigOverlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
@@ -625,7 +625,7 @@
       text-align: center;
       margin-bottom: 14px;
     }
-    .route-ontgrendel-kaart input {
+    .route-ontgrendel-kaart input:not([type="checkbox"]) {
       display: block;
       width: 100%;
       padding: 14px;
@@ -653,6 +653,68 @@
       width: auto;
       padding: 12px;
       font-size: 15px;
+    }
+    #feedbackOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .feedback-kaart {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 24px 44px -18px rgba(0,0,0,0.45);
+      text-align: center;
+    }
+    .feedback-sterren {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 4px 0 16px;
+    }
+    .feedback-ster {
+      background: none;
+      border: none;
+      padding: 0;
+      line-height: 1;
+      font-size: 34px;
+      color: var(--border);
+      cursor: pointer;
+    }
+    .feedback-ster.actief {
+      color: var(--brass);
+    }
+    .feedback-tekstvak {
+      display: block;
+      width: 100%;
+      min-height: 90px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 14px;
+      background: var(--bg);
+      color: var(--ink);
+      resize: vertical;
+    }
+    .feedback-tekstvak:focus {
+      outline: none;
+      border-color: var(--pine);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .feedback-bedankt {
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.5;
+      padding: 12px 0 4px;
     }
     .route-suggestie-btn {
       display: block;
@@ -922,7 +984,40 @@
     <div id="menuDropdown" class="verborgen">
       <button id="faqMenuItem" class="menu-item">FAQ</button>
       <button id="routeMenuItem" class="menu-item">Routelijst digitaal</button>
+      <button id="feedbackMenuItem" class="menu-item">Feedback</button>
       <button id="uitloggenMenuItem" class="menu-item">Uitloggen</button>
+    </div>
+    <div id="uitloggenBevestigOverlay" class="verborgen">
+      <div class="route-ontgrendel-kaart">
+        <div class="route-ontgrendel-tekst">Weet je zeker dat je wilt uitloggen?</div>
+        <label class="onthouden-label">
+          <input type="checkbox" id="uitloggenNietMeerVragen">
+          Voortaan niet meer vragen
+        </label>
+        <div class="route-ontgrendel-knoppen">
+          <button id="uitloggenAnnuleren" class="route-btn-secundair">Terug naar de chatbot</button>
+          <button id="uitloggenBevestigen" class="route-btn">Uitloggen</button>
+        </div>
+      </div>
+    </div>
+    <div id="feedbackOverlay" class="verborgen">
+      <div class="feedback-kaart">
+        <div class="login-titel">Jouw feedback</div>
+        <div id="feedbackForm">
+          <div class="feedback-sterren">
+            <button type="button" class="feedback-ster" data-waarde="1">★</button>
+            <button type="button" class="feedback-ster" data-waarde="2">★</button>
+            <button type="button" class="feedback-ster" data-waarde="3">★</button>
+            <button type="button" class="feedback-ster" data-waarde="4">★</button>
+            <button type="button" class="feedback-ster" data-waarde="5">★</button>
+          </div>
+          <textarea id="feedbackTekst" class="feedback-tekstvak" placeholder="Wat kan er beter? Welke vragen mis je?"></textarea>
+          <button id="feedbackVersturenBtn" class="route-btn">Versturen</button>
+          <div id="feedbackFout" class="login-foutmelding"></div>
+        </div>
+        <div id="feedbackBedankt" class="feedback-bedankt verborgen">Bedankt voor je feedback, we nemen dit zorgvuldig in behandeling!</div>
+        <button id="feedbackSluiten" class="verificatie-opnieuw-btn">Sluiten</button>
+      </div>
     </div>
     <div id="faqOverlay" class="verborgen">
       <div class="faq-header">
@@ -1052,6 +1147,19 @@
     const menuAchtergrondEl = document.getElementById('menuAchtergrond');
     const faqMenuItemEl = document.getElementById('faqMenuItem');
     const uitloggenMenuItemEl = document.getElementById('uitloggenMenuItem');
+    const uitloggenBevestigOverlayEl = document.getElementById('uitloggenBevestigOverlay');
+    const uitloggenNietMeerVragenEl = document.getElementById('uitloggenNietMeerVragen');
+    const uitloggenAnnulerenEl = document.getElementById('uitloggenAnnuleren');
+    const uitloggenBevestigenEl = document.getElementById('uitloggenBevestigen');
+    const feedbackMenuItemEl = document.getElementById('feedbackMenuItem');
+    const feedbackOverlayEl = document.getElementById('feedbackOverlay');
+    const feedbackFormEl = document.getElementById('feedbackForm');
+    const feedbackSterrenEls = document.querySelectorAll('.feedback-ster');
+    const feedbackTekstEl = document.getElementById('feedbackTekst');
+    const feedbackVersturenBtnEl = document.getElementById('feedbackVersturenBtn');
+    const feedbackFoutEl = document.getElementById('feedbackFout');
+    const feedbackBedanktEl = document.getElementById('feedbackBedankt');
+    const feedbackSluitenEl = document.getElementById('feedbackSluiten');
     const faqOverlayEl = document.getElementById('faqOverlay');
     const faqZoekEl = document.getElementById('faqZoek');
     const faqCategorieenEl = document.getElementById('faqCategorieen');
@@ -1182,17 +1290,22 @@
       verificatieInputEl.focus();
     }
 
+    // Bewust NIET verificatieBtnEl (Bevestigen) aanraken hier - dit stuurt
+    // alleen een (nieuwe) code, en mag de bevestig-knop niet blokkeren terwijl
+    // dat gebeurt. Anders zou "Bevestigen" op slot blijven staan zolang het
+    // versturen bezig is, ook al heeft de chauffeur de code allang ontvangen
+    // en getypt.
     function verstuurVerificatiecode() {
-      verificatieBtnEl.disabled = true;
+      verificatieOpnieuwBtnEl.disabled = true;
       appsScriptCall('verstuurVerificatiecode', [idInVerificatie])
         .then(function(resultaat) {
-          verificatieBtnEl.disabled = false;
+          verificatieOpnieuwBtnEl.disabled = false;
           if (!resultaat || !resultaat.verstuurd) {
             verificatieFoutEl.textContent = (resultaat && resultaat.fout) || 'Kon geen verificatiecode versturen.';
           }
         })
         .catch(function() {
-          verificatieBtnEl.disabled = false;
+          verificatieOpnieuwBtnEl.disabled = false;
           verificatieFoutEl.textContent = 'Er ging iets mis bij het versturen van de code, probeer het nogmaals.';
         });
     }
@@ -1270,27 +1383,23 @@
 
       appsScriptCall('verifieerCode', [idInVerificatie, code])
         .then(function(verificatieResultaat) {
+          verificatieBtnEl.disabled = false;
+          verificatieBtnTekstEl.textContent = 'Bevestigen';
+          verificatieSpinnerEl.classList.add('verborgen');
+
           if (!verificatieResultaat || !verificatieResultaat.geldig) {
-            verificatieBtnEl.disabled = false;
-            verificatieBtnTekstEl.textContent = 'Bevestigen';
-            verificatieSpinnerEl.classList.add('verborgen');
             verificatieFoutEl.textContent = (verificatieResultaat && verificatieResultaat.fout) || 'Onjuiste code.';
             return;
           }
 
-          appsScriptCall('checkInloggen', [idInVerificatie, verificatieResultaat.apparaatToken])
-            .then(function(inlogInfo) {
-              verificatieBtnEl.disabled = false;
-              verificatieBtnTekstEl.textContent = 'Bevestigen';
-              verificatieSpinnerEl.classList.add('verborgen');
-              voltooiGeslaagdeLogin(idInVerificatie, verificatieResultaat.apparaatToken, inlogInfo && inlogInfo.voornaam || voornaamInVerificatie, inlogInfo && inlogInfo.hub);
-            })
-            .catch(function() {
-              verificatieBtnEl.disabled = false;
-              verificatieBtnTekstEl.textContent = 'Bevestigen';
-              verificatieSpinnerEl.classList.add('verborgen');
-              voltooiGeslaagdeLogin(idInVerificatie, verificatieResultaat.apparaatToken, voornaamInVerificatie, null);
-            });
+          // verifieerCode geeft voornaam/hub nu meteen mee - geen aparte,
+          // trage checkInloggen-aanroep meer nodig na het verifiëren.
+          voltooiGeslaagdeLogin(
+            idInVerificatie,
+            verificatieResultaat.apparaatToken,
+            verificatieResultaat.voornaam || voornaamInVerificatie,
+            verificatieResultaat.hub || null
+          );
         })
         .catch(function() {
           verificatieBtnEl.disabled = false;
@@ -1467,15 +1576,107 @@
       }
     });
 
-    uitloggenMenuItemEl.addEventListener('click', function() {
-      menuDropdownEl.classList.add('verborgen');
-      menuAchtergrondEl.classList.add('verborgen');
+    // Per ID-code (niet globaal per toestel) onthouden - anders zou chauffeur
+    // A's "niet meer vragen"-keuze ook gelden voor chauffeur B die later op
+    // hetzelfde toestel inlogt.
+    function uitloggenSkipSleutel(idCode) {
+      return 'hf_uitloggen_skip_bevestiging_' + String(idCode || '').trim().toLowerCase();
+    }
+
+    function voerUitloggenUit() {
       huidigeId = null;
       huidigeHub = null;
       huidigeApparaatToken = '';
       wisApparaatTokenLokaal();
       berichtenEl.innerHTML = '';
       toonLogin();
+    }
+
+    uitloggenMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+
+      let skipBevestiging = false;
+      try { skipBevestiging = localStorage.getItem(uitloggenSkipSleutel(huidigeId)) === '1'; } catch (e) {}
+
+      if (skipBevestiging) {
+        voerUitloggenUit();
+        return;
+      }
+
+      uitloggenNietMeerVragenEl.checked = false;
+      uitloggenBevestigOverlayEl.classList.remove('verborgen');
+    });
+
+    uitloggenAnnulerenEl.addEventListener('click', function() {
+      uitloggenBevestigOverlayEl.classList.add('verborgen');
+    });
+
+    uitloggenBevestigenEl.addEventListener('click', function() {
+      if (uitloggenNietMeerVragenEl.checked) {
+        try { localStorage.setItem(uitloggenSkipSleutel(huidigeId), '1'); } catch (e) {}
+      }
+      uitloggenBevestigOverlayEl.classList.add('verborgen');
+      voerUitloggenUit();
+    });
+
+    // --- Feedback ---
+    let feedbackGekozenSterren = 0;
+
+    function werkFeedbackSterrenBij() {
+      feedbackSterrenEls.forEach(function(sterEl) {
+        sterEl.classList.toggle('actief', Number(sterEl.dataset.waarde) <= feedbackGekozenSterren);
+      });
+    }
+
+    feedbackMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+
+      feedbackGekozenSterren = 0;
+      werkFeedbackSterrenBij();
+      feedbackTekstEl.value = '';
+      feedbackFoutEl.textContent = '';
+      feedbackVersturenBtnEl.disabled = false;
+      feedbackBedanktEl.classList.add('verborgen');
+      feedbackFormEl.classList.remove('verborgen');
+      feedbackOverlayEl.classList.remove('verborgen');
+    });
+
+    feedbackSterrenEls.forEach(function(sterEl) {
+      sterEl.addEventListener('click', function() {
+        feedbackGekozenSterren = Number(sterEl.dataset.waarde);
+        feedbackFoutEl.textContent = '';
+        werkFeedbackSterrenBij();
+      });
+    });
+
+    // Feedback wordt bewust niet afgewacht: dit moet vlot aanvoelen voor de
+    // chauffeur, dus meteen het bedankberichtje tonen en na een kort moment
+    // vanzelf sluiten, terwijl het echte opslaan op de achtergrond gebeurt.
+    // Mislukt dat opslaan al eens een keer, dan is dat voor iets zo laag-
+    // risico als feedback geen ramp - de chauffeur hoeft daar niet op te wachten.
+    const FEEDBACK_AUTO_SLUITEN_MS = 2500;
+
+    feedbackVersturenBtnEl.addEventListener('click', function() {
+      if (feedbackGekozenSterren < 1) {
+        feedbackFoutEl.textContent = 'Kies eerst een aantal sterren.';
+        return;
+      }
+
+      appsScriptCall('verstuurFeedback', [huidigeId, huidigeApparaatToken, feedbackGekozenSterren, feedbackTekstEl.value.trim()])
+        .catch(function() {});
+
+      feedbackFormEl.classList.add('verborgen');
+      feedbackBedanktEl.classList.remove('verborgen');
+
+      setTimeout(function() {
+        feedbackOverlayEl.classList.add('verborgen');
+      }, FEEDBACK_AUTO_SLUITEN_MS);
+    });
+
+    feedbackSluitenEl.addEventListener('click', function() {
+      feedbackOverlayEl.classList.add('verborgen');
     });
 
     faqMenuItemEl.addEventListener('click', function() {
