@@ -1694,7 +1694,12 @@
             toonSessieVerlopen();
             return;
           }
-          alleVragen = (resultaat && resultaat.vragen) || [];
+          // Cloudflare/Code.gs sturen ook "stap"-antwoorden mee die alleen via
+          // een keuzeknop bereikt worden (geen eigen vraagtekst, alleen een
+          // ID) - die horen niet als (lege) knop in dit doorzoekbare menu.
+          alleVragen = ((resultaat && resultaat.vragen) || []).filter(function(v) {
+            return v.vraag && v.vraag.trim().length > 0;
+          });
           toonCategorieChips();
           pasFaqFilterToe();
         })
