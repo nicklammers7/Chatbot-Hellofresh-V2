@@ -1040,6 +1040,7 @@
       <button id="faqMenuItem" class="menu-item">FAQ</button>
       <button id="routeMenuItem" class="menu-item">Routelijst digitaal</button>
       <button id="feedbackMenuItem" class="menu-item">Feedback</button>
+      <button id="voorwaardenMenuItem" class="menu-item">Algemene voorwaarden</button>
       <button id="uitloggenMenuItem" class="menu-item">Uitloggen</button>
     </div>
     <div id="uitloggenBevestigOverlay" class="verborgen">
@@ -1313,6 +1314,7 @@
     const uitloggenAnnulerenEl = document.getElementById('uitloggenAnnuleren');
     const uitloggenBevestigenEl = document.getElementById('uitloggenBevestigen');
     const feedbackMenuItemEl = document.getElementById('feedbackMenuItem');
+    const voorwaardenMenuItemEl = document.getElementById('voorwaardenMenuItem');
     const feedbackOverlayEl = document.getElementById('feedbackOverlay');
     const feedbackFormEl = document.getElementById('feedbackForm');
     const feedbackSterrenEls = document.querySelectorAll('.feedback-ster');
@@ -1813,6 +1815,12 @@
       berichtenEl.innerHTML = '';
       toonLogin();
     }
+
+    voorwaardenMenuItemEl.addEventListener('click', function() {
+      menuDropdownEl.classList.add('verborgen');
+      menuAchtergrondEl.classList.add('verborgen');
+      voorwaardenModalEl.classList.remove('verborgen');
+    });
 
     uitloggenMenuItemEl.addEventListener('click', function() {
       menuDropdownEl.classList.add('verborgen');
