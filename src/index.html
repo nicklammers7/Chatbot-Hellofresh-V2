@@ -952,14 +952,14 @@
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
         <div class="login-titel">HelloFresh Guide</div>
-        <input id="loginId" class="login-input" type="text" placeholder="Vul je chauffeurs-ID in" autocomplete="off">
+        <input id="loginId" class="login-input" type="email" placeholder="Vul hier je MobileNXT emailadres in" autocomplete="email">
         <label class="onthouden-label">
           <input type="checkbox" id="loginOnthouden" checked>
           Dit toestel onthouden
         </label>
         <button id="loginBtn"><span id="loginBtnTekst">Inloggen</span><span id="loginSpinner" class="spinner verborgen"></span></button>
         <div id="loginFout" class="login-foutmelding"></div>
-        <div class="login-hint">Je ID-code vind je terug in de Quinyx-app.</div>
+        <div class="login-hint">Voor vragen, bel de HUB.</div>
       </div>
       <div id="verificatieKaart" class="login-kaart verborgen">
         <div class="login-titel">Verificatiecode</div>
@@ -1242,9 +1242,8 @@
     const verificatieFoutEl = document.getElementById('verificatieFout');
     const verificatieOpnieuwBtnEl = document.getElementById('verificatieOpnieuwBtn');
 
-    function startChat(voornaam) {
-      const naamDeel = voornaam ? ' ' + voornaam : '';
-      voegBerichtToe('Hi' + naamDeel + '! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.', 'bot');
+    function startChat() {
+      voegBerichtToe('Hi! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.', 'bot');
     }
 
     function toonLogin(foutmelding) {
@@ -1270,7 +1269,7 @@
         wisApparaatTokenLokaal();
       }
       verbergLogin();
-      startChat(voornaam);
+      startChat();
     }
 
     function toonSessieVerlopen() {
@@ -1355,9 +1354,9 @@
             toonVerificatieScherm();
             verstuurVerificatiecode();
           } else if (resultaat && resultaat.status === 'inactief') {
-            toonLogin('Deze ID-code is nog niet actief. Neem contact op met de HUB.');
+            toonLogin('Dit e-mailadres is nog niet actief. Neem contact op met de HUB.');
           } else {
-            toonLogin('Ongeldige ID-code, probeer het nogmaals.');
+            toonLogin('Ongeldig e-mailadres, probeer het nogmaals.');
           }
         })
         .catch(function() {
@@ -1695,7 +1694,12 @@
             toonSessieVerlopen();
             return;
           }
-          alleVragen = (resultaat && resultaat.vragen) || [];
+          // Cloudflare/Code.gs sturen ook "stap"-antwoorden mee die alleen via
+          // een keuzeknop bereikt worden (geen eigen vraagtekst, alleen een
+          // ID) - die horen niet als (lege) knop in dit doorzoekbare menu.
+          alleVragen = ((resultaat && resultaat.vragen) || []).filter(function(v) {
+            return v.vraag && v.vraag.trim().length > 0;
+          });
           toonCategorieChips();
           pasFaqFilterToe();
         })
