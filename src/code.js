@@ -127,7 +127,7 @@ export default {
             return jsonResponse(gecachedLogin);
           }
 
-          // Voor chauffeurs zonder 2FA-plicht (dus buiten VERIFICATIE_TEST_IDS)
+          // Voor chauffeurs zonder 2FA-plicht (dus buiten VERIFICATIE_TEST_EMAILS)
           // hangt "geldig ingelogd" niet af van een token-check in Apps
           // Script (zie isVertrouwdApparaat daar) - voor hén kunnen we het
           // hele antwoord dus lokaal samenstellen uit de gecachete
