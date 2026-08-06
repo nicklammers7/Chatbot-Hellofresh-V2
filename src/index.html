@@ -720,6 +720,8 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
     }
     .feedback-kaart {
       background: var(--surface);
@@ -1917,6 +1919,14 @@
 
     feedbackSluitenEl.addEventListener('click', function() {
       feedbackOverlayEl.classList.add('verborgen');
+    });
+
+    // Klikken op de wazige achtergrond (niet op de kaart zelf) sluit
+    // feedback ook, net als de voorwaarden-modal en het hamburgermenu.
+    feedbackOverlayEl.addEventListener('click', function(e) {
+      if (e.target === feedbackOverlayEl) {
+        feedbackOverlayEl.classList.add('verborgen');
+      }
     });
 
     faqMenuItemEl.addEventListener('click', function() {
