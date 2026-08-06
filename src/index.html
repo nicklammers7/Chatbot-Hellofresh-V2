@@ -601,7 +601,7 @@
       color: var(--pine);
       border: 1px solid var(--pine);
     }
-    #routeOntgrendelOverlay, #uitloggenBevestigOverlay {
+    #routeOntgrendelOverlay, #uitloggenBevestigOverlay, #disclaimerOverlay {
       position: fixed;
       inset: 0;
       background: rgba(0,0,0,0.5);
@@ -653,6 +653,47 @@
       width: auto;
       padding: 12px;
       font-size: 15px;
+    }
+
+    /* --- Disclaimer / algemene voorwaarden --- */
+    .disclaimer-tekst {
+      font-size: 15px;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .disclaimer-link {
+      background: transparent;
+      border: none;
+      padding: 0;
+      color: var(--pine);
+      font-size: 15px;
+      font-weight: bold;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    #disclaimerDoorgaanBtn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #voorwaardenModal {
+      z-index: 65;
+    }
+    .voorwaarden-kaart {
+      max-width: 420px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .voorwaarden-tekst {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.6;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      margin-bottom: 16px;
+      padding-right: 4px;
     }
     #feedbackOverlay {
       position: fixed;
@@ -1000,6 +1041,31 @@
         </div>
       </div>
     </div>
+    <div id="disclaimerOverlay" class="verborgen">
+      <div class="route-ontgrendel-kaart">
+        <div class="login-titel">Algemene voorwaarden</div>
+        <div class="disclaimer-tekst">
+          Voordat je verdergaat, vragen we je akkoord te gaan met onze
+          <button type="button" id="disclaimerLezenBtn" class="disclaimer-link">algemene voorwaarden</button>.
+        </div>
+        <label class="onthouden-label">
+          <input type="checkbox" id="disclaimerAkkoord">
+          Ik ga akkoord met de algemene voorwaarden
+        </label>
+        <label class="onthouden-label">
+          <input type="checkbox" id="disclaimerOnthouden">
+          Herinner mij hier de komende 30 dagen niet meer aan
+        </label>
+        <button id="disclaimerDoorgaanBtn" class="route-btn" disabled>Doorgaan</button>
+      </div>
+    </div>
+    <div id="voorwaardenModal" class="verborgen">
+      <div class="route-ontgrendel-kaart voorwaarden-kaart">
+        <div class="login-titel">Algemene voorwaarden</div>
+        <div id="voorwaardenTekst" class="voorwaarden-tekst">Test van algemene voorwaarden.. (de definitieve voorwaarden volgen later)</div>
+        <button id="voorwaardenSluitenBtn" class="route-btn-secundair">Sluiten</button>
+      </div>
+    </div>
     <div id="feedbackOverlay" class="verborgen">
       <div class="feedback-kaart">
         <div class="login-titel">Jouw feedback</div>
@@ -1167,6 +1233,14 @@
     const faqSluitenEl = document.getElementById('faqSluiten');
     let actieveCategorie = 'Alle';
 
+    const disclaimerOverlayEl = document.getElementById('disclaimerOverlay');
+    const disclaimerAkkoordEl = document.getElementById('disclaimerAkkoord');
+    const disclaimerOnthoudenEl = document.getElementById('disclaimerOnthouden');
+    const disclaimerDoorgaanBtnEl = document.getElementById('disclaimerDoorgaanBtn');
+    const disclaimerLezenBtnEl = document.getElementById('disclaimerLezenBtn');
+    const voorwaardenModalEl = document.getElementById('voorwaardenModal');
+    const voorwaardenSluitenBtnEl = document.getElementById('voorwaardenSluitenBtn');
+
     let alleVragen = [];
 
     const GEEN_ANTWOORD_TEKST = 'Hier heb ik geen antwoord op, neem contact op met de HUB.';
@@ -1225,6 +1299,56 @@
       } catch (e) {}
     }
 
+    // --- Disclaimer / algemene voorwaarden -----------------------------
+    // Moet vóór het eerste gebruik van de chatbot geaccepteerd worden, elke
+    // keer opnieuw na inloggen - tenzij "herinner mij niet meer aan" was
+    // aangevinkt, dan slaan we een verval-tijdstip lokaal op.
+    const DISCLAIMER_SKIP_TOT_KEY = 'hf_disclaimer_skip_tot';
+    const DISCLAIMER_GELDIGHEID_DAGEN = 30;
+
+    function moetDisclaimerTonen() {
+      try {
+        const opgeslagenTot = localStorage.getItem(DISCLAIMER_SKIP_TOT_KEY);
+        if (!opgeslagenTot) return true;
+        return Date.now() >= Number(opgeslagenTot);
+      } catch (e) {
+        return true;
+      }
+    }
+
+    function slaDisclaimerOverslaanOp() {
+      try {
+        const totTijdstip = Date.now() + DISCLAIMER_GELDIGHEID_DAGEN * 24 * 60 * 60 * 1000;
+        localStorage.setItem(DISCLAIMER_SKIP_TOT_KEY, String(totTijdstip));
+      } catch (e) {}
+    }
+
+    function toonDisclaimerOverlay() {
+      disclaimerAkkoordEl.checked = false;
+      disclaimerOnthoudenEl.checked = false;
+      disclaimerDoorgaanBtnEl.disabled = true;
+      disclaimerOverlayEl.classList.remove('verborgen');
+    }
+
+    disclaimerAkkoordEl.addEventListener('change', function() {
+      disclaimerDoorgaanBtnEl.disabled = !disclaimerAkkoordEl.checked;
+    });
+
+    disclaimerLezenBtnEl.addEventListener('click', function() {
+      voorwaardenModalEl.classList.remove('verborgen');
+    });
+
+    voorwaardenSluitenBtnEl.addEventListener('click', function() {
+      voorwaardenModalEl.classList.add('verborgen');
+    });
+
+    disclaimerDoorgaanBtnEl.addEventListener('click', function() {
+      if (!disclaimerAkkoordEl.checked) return;
+      if (disclaimerOnthoudenEl.checked) slaDisclaimerOverslaanOp();
+      disclaimerOverlayEl.classList.add('verborgen');
+      startChat();
+    });
+
     const loginOverlayEl = document.getElementById('loginOverlay');
     const loginKaartEl = document.getElementById('loginKaart');
     const loginIdEl = document.getElementById('loginId');
@@ -1269,7 +1393,11 @@
         wisApparaatTokenLokaal();
       }
       verbergLogin();
-      startChat();
+      if (moetDisclaimerTonen()) {
+        toonDisclaimerOverlay();
+      } else {
+        startChat();
+      }
     }
 
     function toonSessieVerlopen() {
