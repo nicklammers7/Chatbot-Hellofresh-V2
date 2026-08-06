@@ -611,6 +611,10 @@
       justify-content: center;
       padding: 20px;
     }
+    #uitloggenBevestigOverlay, #disclaimerOverlay {
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+    }
     .route-ontgrendel-kaart {
       background: var(--surface);
       border-radius: 16px;
@@ -1852,6 +1856,14 @@
 
     uitloggenAnnulerenEl.addEventListener('click', function() {
       uitloggenBevestigOverlayEl.classList.add('verborgen');
+    });
+
+    // Klikken op de wazige achtergrond telt als annuleren (zelfde als
+    // "Terug naar de chatbot"), net als bij de andere kaartjes.
+    uitloggenBevestigOverlayEl.addEventListener('click', function(e) {
+      if (e.target === uitloggenBevestigOverlayEl) {
+        uitloggenBevestigOverlayEl.classList.add('verborgen');
+      }
     });
 
     uitloggenBevestigenEl.addEventListener('click', function() {
