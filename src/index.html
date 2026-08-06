@@ -679,6 +679,8 @@
     }
     #voorwaardenModal {
       z-index: 65;
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
     }
     .voorwaarden-kaart {
       max-width: 420px;
@@ -1437,6 +1439,14 @@
 
     voorwaardenSluitenBtnEl.addEventListener('click', function() {
       voorwaardenModalEl.classList.add('verborgen');
+    });
+
+    // Klikken op de wazige achtergrond (niet op de kaart zelf) sluit de
+    // voorwaarden ook, net als bij het hamburgermenu.
+    voorwaardenModalEl.addEventListener('click', function(e) {
+      if (e.target === voorwaardenModalEl) {
+        voorwaardenModalEl.classList.add('verborgen');
+      }
     });
 
     disclaimerDoorgaanBtnEl.addEventListener('click', function() {
