@@ -247,6 +247,22 @@
       max-width: 400px;
       box-shadow: 0 24px 44px -18px rgba(0,0,0,0.5);
     }
+    .login-logo-wrap {
+      /* Altijd een witte achtergrond achter het logo, ook als de kaart
+         zelf in het donkere thema donker is - anders wordt het zwarte
+         woordmerk in de logo-afbeelding onleesbaar. In het lichte thema
+         valt dit chip-je niet op, omdat de kaart daar toch al wit is. */
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 8px 16px;
+      display: block;
+      width: fit-content;
+      margin: 0 auto 18px;
+    }
+    .login-logo {
+      display: block;
+      height: 32px;
+    }
     .login-titel {
       font-family: var(--font-display);
       font-size: 24px;
@@ -941,6 +957,11 @@
       border: 1px solid var(--border);
       border-bottom-left-radius: 4px;
     }
+    .bericht a {
+      color: var(--pine);
+      font-weight: 600;
+      text-decoration: underline;
+    }
     #invoerBalk {
       display: flex;
       padding: 12px;
@@ -988,10 +1009,34 @@
     .optieBtn:disabled {
       opacity: 0.4;
     }
+    .typing-bericht {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
     .typing-dots {
       display: flex;
       gap: 5px;
       padding: 4px 0;
+    }
+    .typing-annuleer-btn {
+      flex: 0 0 auto;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--ink-muted);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .typing-annuleer-btn:hover {
+      background: var(--border);
+      color: var(--danger);
     }
     .typing-dots span {
       width: 8px;
@@ -1014,6 +1059,9 @@
     <div id="loginOverlay">
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
+        <div class="login-logo-wrap">
+          <img class="login-logo" src="https://media.hellofresh.com/w_256,q_100,f_auto,c_limit,fl_lossy/hellofresh_website/logo/Hello_Fresh_Lockup.png" alt="HelloFresh" width="126" height="32">
+        </div>
         <div class="login-titel">HelloFresh Chatbot</div>
         <input id="loginId" class="login-input" type="email" placeholder="Vul hier je MobileNXT emailadres in" autocomplete="email">
         <label class="onthouden-label">
@@ -1502,6 +1550,87 @@
 
     function startChat() {
       voegBerichtToe('Hi! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.', 'bot');
+      toonStartCategorieen();
+    }
+
+    // Snelkeuze-categorieën direct onder het welkomstbericht - scheelt een
+    // chauffeur die niet precies weet hoe hij zijn vraag moet formuleren het
+    // eerst zelf moeten intypen of het menu linksboven moeten opzoeken.
+    const STARTCATEGORIEEN = ['Koeling', 'Levering', 'Algemeen'];
+
+    function toonStartCategorieen() {
+      const optiesEl = document.createElement('div');
+      optiesEl.className = 'opties';
+
+      STARTCATEGORIEEN.forEach(function(categorie) {
+        const btn = document.createElement('button');
+        btn.className = 'optieBtn';
+        btn.textContent = categorie;
+        btn.addEventListener('click', function() {
+          optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+          toonVragenVoorCategorie(categorie);
+        });
+        optiesEl.appendChild(btn);
+      });
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bericht bot';
+      bubble.appendChild(optiesEl);
+      berichtenEl.appendChild(bubble);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function toonVragenVoorCategorie(categorie) {
+      voegBerichtToe(categorie, 'gebruiker');
+      toonTypingIndicator();
+
+      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken])
+        .then(function(resultaat) {
+          verwijderTypingIndicator();
+
+          if (resultaat && resultaat.ongeldigeSessie) {
+            toonSessieVerlopen();
+            return;
+          }
+
+          const genormaliseerd = categorie.trim().toLowerCase();
+          const vragenInCategorie = ((resultaat && resultaat.vragen) || []).filter(function(v) {
+            return v.vraag && v.vraag.trim().length > 0 &&
+              String(v.categorie || '').toLowerCase().indexOf(genormaliseerd) !== -1;
+          });
+
+          if (!vragenInCategorie.length) {
+            voegBerichtToe('Hier heb ik nog geen vragen onder "' + categorie + '" staan. Stel gerust je eigen vraag.', 'bot');
+            return;
+          }
+
+          const optiesEl = document.createElement('div');
+          optiesEl.className = 'opties';
+
+          vragenInCategorie.forEach(function(vraagObj) {
+            const btn = document.createElement('button');
+            btn.className = 'optieBtn';
+            btn.textContent = vraagObj.vraag;
+            btn.addEventListener('click', function() {
+              optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+              kiesFaqVraag(vraagObj);
+            });
+            optiesEl.appendChild(btn);
+          });
+
+          const bubble = document.createElement('div');
+          bubble.className = 'bericht bot';
+          const titelEl = document.createElement('div');
+          titelEl.textContent = 'Vragen over ' + categorie + ':';
+          bubble.appendChild(titelEl);
+          bubble.appendChild(optiesEl);
+          berichtenEl.appendChild(bubble);
+          berichtenEl.scrollTop = berichtenEl.scrollHeight;
+        })
+        .catch(function() {
+          verwijderTypingIndicator();
+          voegBerichtToe('Kon de vragen niet laden, probeer het nog eens.', 'bot');
+        });
     }
 
     function toonLogin(foutmelding) {
@@ -1689,15 +1818,59 @@
       berichtenEl.scrollTop = berichtenEl.scrollHeight;
     }
 
-    function toonTypingIndicator() {
+    // Herkent Nederlandse telefoonnummers in antwoordtekst (bijv. "085-2020
+    // 125" of "+31 20 123 4567") en maakt ze klikbaar als tel:-link, zodat
+    // een chauffeur er direct mee kan bellen i.p.v. het nummer te moeten
+    // onthouden of overtypen. Alleen relevant voor tekst uit de Sheet
+    // (beheerd door de planning), dus bewust een ruime, geen sluitende regex.
+    const TELEFOON_REGEX = /(\+31[\s-]?\d(?:[\s-]?\d){8}|0\d(?:[\s-]?\d){8,9})/g;
+
+    function voegTekstMetTelefoonlinksToe(container, tekst) {
+      TELEFOON_REGEX.lastIndex = 0;
+      let laatsteIndex = 0;
+      let match;
+
+      while ((match = TELEFOON_REGEX.exec(tekst)) !== null) {
+        if (match.index > laatsteIndex) {
+          container.appendChild(document.createTextNode(tekst.slice(laatsteIndex, match.index)));
+        }
+        const nummer = match[0];
+        const link = document.createElement('a');
+        link.href = 'tel:' + nummer.replace(/[\s-]/g, '');
+        link.textContent = nummer;
+        container.appendChild(link);
+        laatsteIndex = match.index + nummer.length;
+      }
+
+      if (laatsteIndex < tekst.length) {
+        container.appendChild(document.createTextNode(tekst.slice(laatsteIndex)));
+      }
+    }
+
+    // vraagVolgnummer: elke nieuwe getypte vraag verhoogt dit nummer. Als de
+    // chauffeur op het kruisje klikt terwijl het antwoord nog onderweg is,
+    // verhogen we het ook - komt het antwoord daarna toch nog binnen, dan
+    // wordt het genegeerd omdat het volgnummer niet meer overeenkomt.
+    let vraagVolgnummer = 0;
+
+    function toonTypingIndicator(onAnnuleer) {
       const bubble = document.createElement('div');
-      bubble.className = 'bericht bot';
+      bubble.className = 'bericht bot typing-bericht';
       bubble.id = 'typingIndicator';
 
       const dotsEl = document.createElement('div');
       dotsEl.className = 'typing-dots';
       dotsEl.innerHTML = '<span></span><span></span><span></span>';
       bubble.appendChild(dotsEl);
+
+      if (onAnnuleer) {
+        const annuleerBtn = document.createElement('button');
+        annuleerBtn.className = 'typing-annuleer-btn';
+        annuleerBtn.setAttribute('aria-label', 'Vraag annuleren');
+        annuleerBtn.textContent = '✕';
+        annuleerBtn.addEventListener('click', onAnnuleer);
+        bubble.appendChild(annuleerBtn);
+      }
 
       berichtenEl.appendChild(bubble);
       berichtenEl.scrollTop = berichtenEl.scrollHeight;
@@ -1728,7 +1901,7 @@
 
       if (heeftTekst) {
         const tekstEl = document.createElement('div');
-        tekstEl.textContent = stap.tekst;
+        voegTekstMetTelefoonlinksToe(tekstEl, stap.tekst);
         bubble.appendChild(tekstEl);
       } else if (heeftSuggesties) {
         const tekstEl = document.createElement('div');
@@ -1799,7 +1972,20 @@
       inputEl.value = '';
       inputEl.disabled = true;
       knopEl.disabled = true;
-      toonTypingIndicator();
+
+      vraagVolgnummer++;
+      const ditVolgnummer = vraagVolgnummer;
+
+      toonTypingIndicator(function() {
+        // Annuleren: dit volgnummer ongeldig maken zodat een eventueel later
+        // toch nog binnenkomend antwoord genegeerd wordt (zie hieronder).
+        vraagVolgnummer++;
+        verwijderTypingIndicator();
+        voegBerichtToe('Vraag geannuleerd.', 'bot');
+        inputEl.disabled = false;
+        knopEl.disabled = false;
+        inputEl.focus();
+      });
 
       const startTijd = Date.now();
 
@@ -1809,6 +1995,7 @@
           if (verstreken < 1000) {
             await sleep(1000 - verstreken);
           }
+          if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
           toonStap(stap);
           inputEl.disabled = false;
@@ -1816,6 +2003,7 @@
           inputEl.focus();
         })
         .catch(function() {
+          if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
           voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
           inputEl.value = tekst;
