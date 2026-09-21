@@ -9,8 +9,15 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVsc2KHocAkG
 //   trager (~10-20ms) maar overleeft dat inslapen wél - dus de eerste
 //   aanvraag na een tijdje stilte hoeft niet meer helemaal opnieuw naar
 //   Google Apps Script (en diens eigen, tragere opstart-overhead).
-let faqCacheGeheugen = null;
+// Eén cache-slot per taal - de NL- en EN-vragenlijst zijn twee losse Sheet-
+// tabs in Code.gs (zie haalAntwoordenSheetNaam daar) en horen dus ook los
+// gecacht te worden.
+let faqCacheGeheugen = { nl: null, en: null };
 const FAQ_CACHE_SECONDEN = 30 * 60; // 30 minuten
+
+function normaliseerTaal(taal) {
+  return String(taal || '').trim().toLowerCase() === 'en' ? 'en' : 'nl';
+}
 let chauffeursCacheGeheugen = null;
 // Kort genoeg dat een net gedeactiveerde chauffeur niet te lang "actief" kan
 // blijven lijken bij Cloudflare, lang genoeg om de meeste logins (van
@@ -118,12 +125,12 @@ export default {
         // 🚀 1. INLOGGEN OP CLOUDFLARE - eerst de KV-cache proberen (zelfde
         // idCode + token binnen 10 min = geen nieuwe aanroep naar Google nodig)
         if (actie === "checkInloggen") {
-          const [idCode, apparaatToken] = args;
+          const [idCode, apparaatToken, taal] = args;
           const loginSleutel = 'login_' + idCode + '_' + apparaatToken;
 
           const gecachedLogin = await veiligKvGet(env, loginSleutel);
           if (gecachedLogin) {
-            ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+            ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal));
             return jsonResponse(gecachedLogin);
           }
 
@@ -147,7 +154,7 @@ export default {
                 hub: chauffeur.hub,
               };
               ctx.waitUntil(veiligKvPut(env, loginSleutel, lokaalJson, LOGIN_CACHE_SECONDEN));
-              ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+              ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal));
               return jsonResponse(lokaalJson);
             }
           }
@@ -158,14 +165,14 @@ export default {
             body: bodyText,
           });
           ctx.waitUntil(veiligKvPut(env, loginSleutel, json, LOGIN_CACHE_SECONDEN));
-          ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken));
+          ctx.waitUntil(haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal));
           return jsonResponse(json);
         }
 
         // 🚀 2. FAQ-LIJST LADEN OP CLOUDFLARE
         if (actie === "haalAlleVragen") {
-          const [idCode, apparaatToken] = args;
-          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const [idCode, apparaatToken, taal] = args;
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal);
 
           if (cacheData && cacheData.vragen) {
             return jsonResponse(cacheData);
@@ -174,8 +181,8 @@ export default {
 
         // 🚀 3. ZOEKOPDRACHT OP CLOUDFLARE
         if (actie === "zoekAntwoord") {
-          const [idCode, apparaatToken, vraagTekst] = args;
-          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const [idCode, apparaatToken, vraagTekst, taal] = args;
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal);
 
           if (cacheData && cacheData.vragen) {
             const match = vindBesteMatch(vraagTekst, cacheData.vragen);
@@ -196,7 +203,7 @@ export default {
             );
 
             // Bepaal slimme "bedoel je misschien..." suggesties uit de cache
-            const suggesties = zoekSuggestiesInCache(cacheData.vragen, vraagTekst);
+            const suggesties = zoekSuggestiesInCache(cacheData.vragen, vraagTekst, taal);
 
             await wachtNatuurlijk();
 
@@ -207,8 +214,8 @@ export default {
 
         // 🚀 4. FAQ KLIK OP CLOUDFLARE
         if (actie === "haalAntwoordOpRij") {
-          const [idCode, apparaatToken, rijNummer] = args;
-          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const [idCode, apparaatToken, rijNummer, taal] = args;
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal);
 
           if (cacheData && cacheData.vragen) {
             const rijMatch = cacheData.vragen.find(v => Number(v.rij) === Number(rijNummer));
@@ -221,8 +228,8 @@ export default {
 
         // 🚀 5. KEUZEKNOP KLIK OP CLOUDFLARE
         if (actie === "haalStap") {
-          const [idCode, apparaatToken, stapId] = args;
-          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken);
+          const [idCode, apparaatToken, stapId, taal] = args;
+          const cacheData = await haalCacheOp(env, GOOGLE_SCRIPT_URL, idCode, apparaatToken, taal);
 
           if (cacheData && cacheData.vragen) {
             const stapMatch = cacheData.vragen.find(v => String(v.id).trim() === String(stapId).trim());
@@ -283,30 +290,34 @@ async function veiligKvPut(env, sleutel, waarde, ttlSeconden) {
 
 // Eerst het geheugen van déze Worker-instantie proberen (instant), dan
 // Cloudflare KV (overleeft inactiviteit), en pas als beide leeg zijn de
-// echte, tragere aanroep naar Google Apps Script.
-async function haalCacheOp(env, scriptUrl, idCode, apparaatToken) {
-  if (faqCacheGeheugen) return faqCacheGeheugen;
+// echte, tragere aanroep naar Google Apps Script. Eén cache-slot per taal
+// (zie faqCacheGeheugen hierboven) - de NL- en EN-vragenlijst komen uit twee
+// losse Sheet-tabs en mogen elkaar dus nooit overschrijven.
+async function haalCacheOp(env, scriptUrl, idCode, apparaatToken, taal) {
+  const t = normaliseerTaal(taal);
+  if (faqCacheGeheugen[t]) return faqCacheGeheugen[t];
 
-  const uitKv = await veiligKvGet(env, 'faq_cache');
+  const kvSleutel = 'faq_cache_' + t;
+  const uitKv = await veiligKvGet(env, kvSleutel);
   if (uitKv) {
-    faqCacheGeheugen = uitKv;
+    faqCacheGeheugen[t] = uitKv;
     return uitKv;
   }
 
   try {
-    const payload = JSON.stringify({ actie: "haalAlleVragen", argumenten: [idCode, apparaatToken] });
+    const payload = JSON.stringify({ actie: "haalAlleVragen", argumenten: [idCode, apparaatToken, t] });
     const json = await fetchAppsScriptJson(scriptUrl, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: payload,
     });
     if (json && json.vragen && json.vragen.length > 0) {
-      faqCacheGeheugen = json;
-      await veiligKvPut(env, 'faq_cache', json, FAQ_CACHE_SECONDEN);
+      faqCacheGeheugen[t] = json;
+      await veiligKvPut(env, kvSleutel, json, FAQ_CACHE_SECONDEN);
     }
-    return faqCacheGeheugen;
+    return faqCacheGeheugen[t];
   } catch (e) {
-    return faqCacheGeheugen;
+    return faqCacheGeheugen[t];
   }
 }
 
@@ -422,11 +433,24 @@ const NL_STOPWOORDEN = [
   'kan', 'kunnen', 'wil', 'willen', 'zou', 'zullen', 'gaat', 'gaan'
 ];
 
-function zoekSuggestiesInCache(vragenLijst, vraagTekst) {
+const EN_STOPWOORDEN = [
+  'the', 'a', 'an', 'and', 'or', 'but', 'so', 'if', 'then', 'that', 'this',
+  'these', 'those', 'there', 'here', 'where', 'what', 'who', 'how', 'when',
+  'why', 'which', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him',
+  'her', 'us', 'them', 'my', 'your', 'his', 'its', 'our', 'their', 'not',
+  'no', 'also', 'still', 'yet', 'to', 'of', 'for', 'with', 'on', 'in', 'at',
+  'from', 'out', 'over', 'under', 'between', 'by', 'without', 'until',
+  'after', 'during', 'is', 'am', 'are', 'was', 'were', 'be', 'been',
+  'being', 'has', 'have', 'had', 'must', 'should', 'may', 'might', 'can',
+  'could', 'will', 'would', 'shall', 'do', 'does', 'did', 'about'
+];
+
+function zoekSuggestiesInCache(vragenLijst, vraagTekst, taal) {
   if (!vragenLijst || !vraagTekst) return [];
 
+  const stopwoorden = normaliseerTaal(taal) === 'en' ? EN_STOPWOORDEN : NL_STOPWOORDEN;
   const invoerWoorden = normaliseerWoorden(vraagTekst);
-  const betekenisvolleInvoerWoorden = invoerWoorden.filter(w => NL_STOPWOORDEN.indexOf(w) === -1);
+  const betekenisvolleInvoerWoorden = invoerWoorden.filter(w => stopwoorden.indexOf(w) === -1);
 
   const kandidaten = [];
 
@@ -434,7 +458,7 @@ function zoekSuggestiesInCache(vragenLijst, vraagTekst) {
     if (!item.vraag) return;
 
     const overlap = normaliseerWoorden(item.vraag).filter(function(woord) {
-      return NL_STOPWOORDEN.indexOf(woord) === -1 && betekenisvolleInvoerWoorden.indexOf(woord) !== -1;
+      return stopwoorden.indexOf(woord) === -1 && betekenisvolleInvoerWoorden.indexOf(woord) !== -1;
     }).length;
 
     if (overlap > 0) {

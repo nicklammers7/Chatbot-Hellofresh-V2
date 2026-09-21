@@ -208,6 +208,31 @@
       fill: var(--brass);
       stroke: var(--brass);
     }
+    .taal-wissel {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .taal-knop {
+      width: 30px;
+      height: 30px;
+      flex: 0 0 auto;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      font-size: 17px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.45;
+      filter: grayscale(70%);
+    }
+    .taal-knop.actief {
+      opacity: 1;
+      filter: none;
+      box-shadow: 0 0 0 2px var(--brass) inset;
+    }
     #themaKnop {
       position: absolute;
       top: 50%;
@@ -1056,6 +1081,10 @@
 <body>
   <div id="app">
     <div id="loginOverlay">
+      <div class="taal-wissel" id="taalWisselLogin" style="position:absolute; top:16px; left:16px;">
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
+        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+      </div>
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
         <div class="login-logo-wrap">
@@ -1066,21 +1095,21 @@
         <input id="loginId" class="login-input" type="email" placeholder="Vul hier je MobileNXT emailadres in" autocomplete="email">
         <label class="onthouden-label">
           <input type="checkbox" id="loginOnthouden" checked>
-          Dit toestel onthouden
+          <span id="loginOnthoudenTekst">Dit toestel onthouden</span>
         </label>
         <button id="loginBtn"><span id="loginBtnTekst">Inloggen</span><span id="loginSpinner" class="spinner verborgen"></span></button>
         <div id="loginFout" class="login-foutmelding"></div>
-        <div class="login-hint">Voor vragen, bel de HUB.</div>
+        <div class="login-hint" id="loginHint">Voor vragen, bel de HUB.</div>
       </div>
       <div id="verificatieKaart" class="login-kaart verborgen">
-        <div class="login-titel">Verificatiecode</div>
-        <div class="login-hint">We hebben een code gestuurd naar je e-mailadres. Vul 'm hieronder in.</div>
+        <div class="login-titel" id="verificatieTitel">Verificatiecode</div>
+        <div class="login-hint" id="verificatieHint">We hebben een code gestuurd naar je e-mailadres. Vul 'm hieronder in.</div>
         <input id="verificatieInput" class="login-input code-input" type="text" inputmode="numeric" maxlength="5" placeholder="•••••" autocomplete="off">
         <button id="verificatieBtn"><span id="verificatieBtnTekst">Bevestigen</span><span id="verificatieSpinner" class="spinner verborgen"></span></button>
         <div id="verificatieFout" class="login-foutmelding"></div>
         <button id="verificatieOpnieuwBtn" class="verificatie-opnieuw-btn">Geen code ontvangen? Opnieuw versturen</button>
       </div>
-      <div class="login-footer">Alle rechten voorbehouden.<br>Ontwikkeld door Nick Lammers</div>
+      <div class="login-footer" id="loginFooter">Alle rechten voorbehouden.<br>Ontwikkeld door Nick Lammers</div>
     </div>
     <header>
       <button id="menuKnop" aria-label="Menu">
@@ -1089,6 +1118,10 @@
         </svg>
       </button>
       HelloFresh Chatbot
+      <div class="taal-wissel" id="taalWisselHeader" style="position:absolute; top:50%; right:58px; transform:translateY(-50%);">
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
+        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+      </div>
       <button id="themaKnop" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
     </header>
     <div id="menuAchtergrond" class="verborgen"></div>
@@ -1101,10 +1134,10 @@
     </div>
     <div id="uitloggenBevestigOverlay" class="verborgen">
       <div class="route-ontgrendel-kaart">
-        <div class="route-ontgrendel-tekst">Weet je zeker dat je wilt uitloggen?</div>
+        <div class="route-ontgrendel-tekst" id="uitloggenVraagTekst">Weet je zeker dat je wilt uitloggen?</div>
         <label class="onthouden-label">
           <input type="checkbox" id="uitloggenNietMeerVragen">
-          Voortaan niet meer vragen
+          <span id="uitloggenNietMeerVragenTekst">Voortaan niet meer vragen</span>
         </label>
         <div class="route-ontgrendel-knoppen">
           <button id="uitloggenAnnuleren" class="route-btn-secundair">Terug naar de chatbot</button>
@@ -1114,25 +1147,25 @@
     </div>
     <div id="disclaimerOverlay" class="verborgen">
       <div class="route-ontgrendel-kaart">
-        <div class="login-titel">Algemene voorwaarden</div>
+        <div class="login-titel" id="disclaimerTitel">Algemene voorwaarden</div>
         <div class="disclaimer-tekst">
-          Voordat je verdergaat, vragen we je akkoord te gaan met onze
+          <span id="disclaimerTekstVoor">Voordat je verdergaat, vragen we je akkoord te gaan met onze</span>
           <button type="button" id="disclaimerLezenBtn" class="disclaimer-link">algemene voorwaarden</button>.
         </div>
         <label class="onthouden-label">
           <input type="checkbox" id="disclaimerAkkoord">
-          Ik ga akkoord met de algemene voorwaarden
+          <span id="disclaimerAkkoordTekst">Ik ga akkoord met de algemene voorwaarden</span>
         </label>
         <label class="onthouden-label">
           <input type="checkbox" id="disclaimerOnthouden">
-          Herinner mij hier de komende 30 dagen niet meer aan
+          <span id="disclaimerOnthoudenTekst">Herinner mij hier de komende 30 dagen niet meer aan</span>
         </label>
         <button id="disclaimerDoorgaanBtn" class="route-btn" disabled>Doorgaan</button>
       </div>
     </div>
     <div id="voorwaardenModal" class="verborgen">
       <div class="route-ontgrendel-kaart voorwaarden-kaart">
-        <div class="login-titel">Algemene voorwaarden</div>
+        <div class="login-titel" id="voorwaardenTitel">Algemene voorwaarden</div>
         <div id="voorwaardenTekst" class="voorwaarden-tekst">
           <p><strong>Privacyvoorwaarden HelloFresh Chatbot</strong></p>
 
@@ -1220,7 +1253,7 @@
     </div>
     <div id="feedbackOverlay" class="verborgen">
       <div class="feedback-kaart">
-        <div class="login-titel">Jouw feedback</div>
+        <div class="login-titel" id="feedbackTitel">Jouw feedback</div>
         <div id="feedbackForm">
           <div class="feedback-sterren">
             <button type="button" class="feedback-ster" data-waarde="1">★</button>
@@ -1249,7 +1282,7 @@
     <div id="routeOverlay" class="verborgen">
       <div class="route-header">
         <button id="routeSluiten" aria-label="Sluiten">&times;</button>
-        Routelijst digitaal
+        <span id="routeHeaderTitel">Routelijst digitaal</span>
         <button id="themaKnopRoute" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       </div>
       <div class="route-inhoud">
@@ -1262,7 +1295,7 @@
     </div>
     <div id="routeOntgrendelOverlay" class="verborgen">
       <div class="route-ontgrendel-kaart">
-        <div class="route-ontgrendel-tekst">Dit is een route van gisteren. Vul hieronder de ontgrendelcode in.</div>
+        <div class="route-ontgrendel-tekst" id="routeOntgrendelTekst">Dit is een route van gisteren. Vul hieronder de ontgrendelcode in.</div>
         <input id="routeOntgrendelPopupInvoer" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="Ontgrendelcode">
         <div id="routeOntgrendelPopupFout" class="route-ontgrendel-foutmelding"></div>
         <div class="route-ontgrendel-knoppen">
@@ -1345,6 +1378,481 @@
     themaKnopLoginEl.addEventListener('click', wisselThema);
     themaKnopRouteEl.addEventListener('click', wisselThema);
 
+    // --- Taal (NL/EN) ---
+    const TAAL_KEY = 'hf_taal';
+
+    const VERTALINGEN = {
+      nl: {
+        LOGIN_PLACEHOLDER_EMAIL: 'Vul hier je MobileNXT emailadres in',
+        LOGIN_ONTHOUDEN: 'Dit toestel onthouden',
+        LOGIN_BTN: 'Inloggen',
+        LOGIN_BTN_BEZIG: 'Bezig met inloggen...',
+        LOGIN_HINT: 'Voor vragen, bel de HUB.',
+        LOGIN_INACTIEF: 'Dit e-mailadres is nog niet actief. Neem contact op met de HUB.',
+        LOGIN_ONGELDIG: 'Ongeldig e-mailadres, probeer het nogmaals.',
+        ONJUISTE_CODE: 'Onjuiste code.',
+        LOGIN_FOOTER: 'Alle rechten voorbehouden.<br>Ontwikkeld door Nick Lammers',
+        VERIFICATIE_TITEL: 'Verificatiecode',
+        VERIFICATIE_HINT: 'We hebben een code gestuurd naar je e-mailadres. Vul \'m hieronder in.',
+        VERIFICATIE_PLACEHOLDER_CODE: '•••••',
+        VERIFICATIE_BTN: 'Bevestigen',
+        VERIFICATIE_BTN_BEZIG: 'Bezig met controleren...',
+        VERIFICATIE_OPNIEUW: 'Geen code ontvangen? Opnieuw versturen',
+        VERIFICATIE_KON_NIET_VERSTUREN: 'Kon geen verificatiecode versturen.',
+        VERIFICATIE_FOUT_VERSTUREN: 'Er ging iets mis bij het versturen van de code, probeer het nogmaals.',
+        SESSIE_VERLOPEN: 'Je sessie is verlopen, log opnieuw in.',
+        ER_GING_IETS_MIS: 'Er ging iets mis, probeer het nogmaals.',
+        TRAAG_VERBINDING: 'De verbinding was even traag, probeer het nogmaals.',
+        ARIA_MENU: 'Menu',
+        ARIA_THEMA: 'Wissel tussen licht en donker thema',
+        ARIA_SLUITEN: 'Sluiten',
+        ARIA_BEL_HUB: 'Bel een HUB',
+        HEADER_TITEL: 'HelloFresh Chatbot',
+        MENU_FAQ: 'FAQ',
+        MENU_ROUTE: 'Routelijst digitaal',
+        MENU_FEEDBACK: 'Feedback',
+        MENU_VOORWAARDEN: 'Algemene voorwaarden',
+        MENU_UITLOGGEN: 'Uitloggen',
+        UITLOGGEN_VRAAG: 'Weet je zeker dat je wilt uitloggen?',
+        UITLOGGEN_NIET_MEER_VRAGEN: 'Voortaan niet meer vragen',
+        UITLOGGEN_TERUG: 'Terug naar de chatbot',
+        UITLOGGEN_BEVESTIG: 'Uitloggen',
+        DISCLAIMER_TITEL: 'Algemene voorwaarden',
+        DISCLAIMER_TEKST_VOOR: 'Voordat je verdergaat, vragen we je akkoord te gaan met onze',
+        DISCLAIMER_LINK: 'algemene voorwaarden',
+        DISCLAIMER_AKKOORD: 'Ik ga akkoord met de algemene voorwaarden',
+        DISCLAIMER_ONTHOUDEN: 'Herinner mij hier de komende 30 dagen niet meer aan',
+        DISCLAIMER_DOORGAAN: 'Doorgaan',
+        VOORWAARDEN_TITEL: 'Algemene voorwaarden',
+        VOORWAARDEN_SLUITEN: 'Sluiten',
+        VOORWAARDEN_HTML: `
+          <p><strong>Privacyvoorwaarden HelloFresh Chatbot</strong></p>
+
+          <p><strong>1. Verwerking van persoonsgegevens</strong><br>
+          Wanneer je de HelloFresh Chatbot gebruikt, kunnen wij de volgende gegevens opslaan:</p>
+          <ul>
+            <li>je zakelijke e-mailadres;</li>
+            <li>de vraag die je aan de chatbot stelt;</li>
+            <li>de datum en het tijdstip waarop je de vraag stelt;</li>
+            <li>het antwoord dat de chatbot geeft;</li>
+            <li>of de chatbot een passend antwoord heeft gevonden.</li>
+          </ul>
+
+          <p><strong>2. Doel van de verwerking</strong><br>
+          Wij gebruiken deze gegevens uitsluitend om:</p>
+          <ul>
+            <li>de kwaliteit en betrouwbaarheid van de chatbot te controleren;</li>
+            <li>ontbrekende of onjuiste antwoorden te herkennen;</li>
+            <li>nieuwe vragen en antwoorden aan de kennisbank toe te voegen;</li>
+            <li>technische problemen en fouten te onderzoeken;</li>
+            <li>indien nodig contact met je op te nemen over een gestelde vraag.</li>
+          </ul>
+          <p>De gegevens worden niet gebruikt voor automatische besluitvorming, profilering, prestatiebeoordelingen of disciplinaire maatregelen.</p>
+
+          <p><strong>3. Vermeld geen gevoelige gegevens</strong><br>
+          Vermeld in je vraag geen gegevens die niet noodzakelijk zijn, zoals:</p>
+          <ul>
+            <li>medische of gezondheidsgegevens;</li>
+            <li>klantnamen, adressen of telefoonnummers;</li>
+            <li>persoonsgegevens van collega's of andere personen;</li>
+            <li>wachtwoorden, toegangscodes of andere vertrouwelijke informatie.</li>
+          </ul>
+          <p>Wanneer dergelijke gegevens toch worden ingevuld, kunnen deze tijdelijk in het chatbotlog terechtkomen. Wij verwijderen deze gegevens zodra wij ze herkennen en ze niet noodzakelijk zijn voor het doel van de verwerking.</p>
+
+          <p><strong>4. Bewaartermijn</strong><br>
+          Het e-mailadres, de vraag, de datum en het antwoord van de chatbot worden maximaal 90 dagen bewaard. De gegevens kunnen eerder worden verwijderd wanneer:</p>
+          <ul>
+            <li>de vraag is beoordeeld en niet langer nodig is;</li>
+            <li>het antwoord aan de kennisbank is toegevoegd;</li>
+            <li>de gegevens niet relevant blijken te zijn;</li>
+            <li>de vraag onnodige of gevoelige persoonsgegevens bevat.</li>
+          </ul>
+          <p>Na maximaal 90 dagen worden de persoonsgegevens verwijderd. Wij kunnen daarna uitsluitend anonieme statistieken bewaren, bijvoorbeeld hoe vaak een bepaald onderwerp is geraadpleegd. Deze statistieken zijn niet meer aan een individuele gebruiker gekoppeld.</p>
+
+          <p><strong>5. Toegang en beveiliging</strong><br>
+          Alleen medewerkers die verantwoordelijk zijn voor het beheer, de beveiliging en de verbetering van de chatbot hebben toegang tot de opgeslagen gegevens. Wij nemen passende technische en organisatorische maatregelen om de gegevens te beschermen tegen onbevoegde toegang, verlies, wijziging of openbaarmaking.</p>
+
+          <p><strong>6. Delen van gegevens</strong><br>
+          De gegevens worden niet verkocht en niet gedeeld met externe partijen, behalve wanneer:</p>
+          <ul>
+            <li>dit noodzakelijk is voor de technische werking van de chatbot;</li>
+            <li>een leverancier namens ons gegevens verwerkt;</li>
+            <li>wij wettelijk verplicht zijn gegevens te verstrekken.</li>
+          </ul>
+          <p>Wanneer een externe leverancier gegevens namens ons verwerkt, worden hierover passende afspraken gemaakt.</p>
+
+          <p><strong>7. Grondslag</strong><br>
+          De verwerking vindt plaats omdat de organisatie een gerechtvaardigd belang heeft bij het verbeteren, beveiligen en beheren van de interne chatbot en het beschikbaar stellen van betrouwbare operationele informatie. Daarbij beperken wij de verwerking tot gegevens die redelijkerwijs nodig zijn voor deze doelen.</p>
+
+          <p><strong>8. Jouw privacyrechten</strong><br>
+          Je kunt, voor zover de AVG dit toestaat, verzoeken om:</p>
+          <ul>
+            <li>inzage in je opgeslagen gegevens;</li>
+            <li>correctie van onjuiste gegevens;</li>
+            <li>verwijdering van je gegevens;</li>
+            <li>beperking van de verwerking;</li>
+            <li>bezwaar tegen de verwerking.</li>
+          </ul>
+          <p>Een verzoek kan worden ingediend via: <span class="voorwaarden-placeholder">[privacy-e-mailadres]</span></p>
+          <p>Wij kunnen aanvullende informatie vragen om je identiteit te controleren voordat wij een verzoek uitvoeren.</p>
+
+          <p><strong>9. Verantwoordelijke organisatie</strong><br>
+          De verwerkingsverantwoordelijke voor deze gegevens is:<br>
+          <span class="voorwaarden-placeholder">[volledige juridische naam organisatie]</span><br>
+          <span class="voorwaarden-placeholder">[vestigingsadres]</span><br>
+          <span class="voorwaarden-placeholder">[privacy-e-mailadres]</span></p>
+          <p>Voor vragen over deze privacyvoorwaarden kun je contact opnemen via het bovenstaande e-mailadres.</p>
+
+          <p><strong>10. Wijzigingen</strong><br>
+          Deze privacyvoorwaarden kunnen worden aangepast wanneer de werking van de chatbot of de verwerking van persoonsgegevens verandert. De meest recente versie wordt bij de chatbot beschikbaar gesteld.</p>
+          <p><em>Laatst bijgewerkt: 6 augustus 2026</em></p>
+        `,
+        FEEDBACK_TITEL: 'Jouw feedback',
+        FEEDBACK_PLACEHOLDER: 'Wat kan er beter? Welke vragen mis je?',
+        FEEDBACK_VERSTUREN: 'Versturen',
+        FEEDBACK_BEDANKT: 'Bedankt voor je feedback, we nemen dit zorgvuldig in behandeling!',
+        FEEDBACK_SLUITEN: 'Sluiten',
+        FEEDBACK_KIES_STERREN: 'Kies eerst een aantal sterren.',
+        FAQ_ZOEK_PLACEHOLDER: 'Zoek een vraag...',
+        FAQ_LADEN: 'Laden...',
+        FAQ_KON_NIET_LADEN: 'Kon de vragen niet laden, probeer het nog eens.',
+        FAQ_GEEN_VRAGEN: 'Geen vragen gevonden.',
+        FAQ_ALLE: 'Alle',
+        ROUTE_TITEL: 'Routelijst digitaal',
+        ROUTE_PLACEHOLDER: 'Volledig routenummer, bijv. DUIAM-260712-6183',
+        ROUTE_ZOEKEN: 'Zoeken',
+        ROUTE_ARIA_VORIGE: 'Vorige pagina',
+        ROUTE_ARIA_VOLGENDE: 'Volgende pagina',
+        ROUTE_ARIA_VERGROTEN: 'Vergroten',
+        ROUTE_ONTGRENDEL_TEKST: 'Dit is een route van gisteren. Vul hieronder de ontgrendelcode in.',
+        ROUTE_ONTGRENDEL_PLACEHOLDER: 'Ontgrendelcode',
+        ROUTE_ONTGRENDEL_ANNULEREN: 'Annuleren',
+        ROUTE_ONTGRENDEL_BEVESTIGEN: 'Bevestigen',
+        ROUTE_GEEN_ROUTE_VANDAAG: 'Geen route gevonden voor vandaag.',
+        ROUTE_WORDT_GELADEN: 'Route wordt geladen, dit kan even duren...',
+        ROUTE_LEEG_INVOER: 'Vul het volledige routenummer in, bijv. DUIAM-260712-6183.',
+        ROUTE_BEZIG_ZOEKEN: 'Bezig met zoeken...',
+        ROUTE_DUURT_TE_LANG: 'Dit duurt te lang. Probeer het nog eens, of neem contact op met de HUB als dit blijft gebeuren.',
+        ROUTE_NA_AFSLUITTIJD: 'De ritlijst is na 23:30 uur niet meer beschikbaar, net als de papieren versie na je dienst.',
+        ROUTE_FOUT_PREFIX: 'Fout: ',
+        ROUTE_MEERDERE: 'Meerdere routes gevonden, neem contact op met de HUB.',
+        ROUTE_GEEN_ROUTE_SUGGESTIES: 'Geen route gevonden. Bedoel je een van deze?',
+        ROUTE_RITLIJST_LADEN: 'Ritlijst wordt geladen...',
+        ROUTE_KON_NIET_OPENEN: 'Kon de ritlijst niet openen.',
+        ROUTE_DOWNLOAD: 'Download ritlijst',
+        ROUTE_PAGINA: 'Pagina {n} van {totaal}',
+        CHAT_WELKOM: 'Hi! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.',
+        CHAT_VOORGESTELDE_CATEGORIEEN: 'Voorgestelde categorieën:',
+        CHAT_GEEN_VRAGEN_IN_CATEGORIE: 'Hier heb ik nog geen vragen onder "{categorie}" staan. Stel gerust je eigen vraag.',
+        CHAT_VRAGEN_OVER: 'Vragen over {categorie}:',
+        CHAT_GEEN_ANTWOORD: 'Hier heb ik geen antwoord op, neem contact op met de HUB.',
+        CHAT_BEDOEL_JE: 'Hier heb ik geen exact antwoord op gevonden. Bedoel je misschien een van deze vragen?',
+        CHAT_VRAAG_GEANNULEERD: 'Vraag geannuleerd.',
+        CHAT_ANNULEER_ARIA: 'Vraag annuleren',
+        CHAT_INPUT_PLACEHOLDER: 'Typ je vraag...',
+        CHAT_VERSTUUR: 'Verstuur'
+      },
+      en: {
+        LOGIN_PLACEHOLDER_EMAIL: 'Enter your MobileNXT email address',
+        LOGIN_ONTHOUDEN: 'Remember this device',
+        LOGIN_BTN: 'Log in',
+        LOGIN_BTN_BEZIG: 'Logging in...',
+        LOGIN_HINT: 'For questions, call the HUB.',
+        LOGIN_INACTIEF: 'This email address is not yet active. Please contact the HUB.',
+        LOGIN_ONGELDIG: 'Invalid email address, please try again.',
+        ONJUISTE_CODE: 'Incorrect code.',
+        LOGIN_FOOTER: 'All rights reserved.<br>Developed by Nick Lammers',
+        VERIFICATIE_TITEL: 'Verification code',
+        VERIFICATIE_HINT: 'We\'ve sent a code to your email address. Enter it below.',
+        VERIFICATIE_PLACEHOLDER_CODE: '•••••',
+        VERIFICATIE_BTN: 'Confirm',
+        VERIFICATIE_BTN_BEZIG: 'Checking...',
+        VERIFICATIE_OPNIEUW: 'Didn\'t receive a code? Resend',
+        VERIFICATIE_KON_NIET_VERSTUREN: 'Could not send a verification code.',
+        VERIFICATIE_FOUT_VERSTUREN: 'Something went wrong sending the code, please try again.',
+        SESSIE_VERLOPEN: 'Your session has expired, please log in again.',
+        ER_GING_IETS_MIS: 'Something went wrong, please try again.',
+        TRAAG_VERBINDING: 'The connection was a bit slow, please try again.',
+        ARIA_MENU: 'Menu',
+        ARIA_THEMA: 'Switch between light and dark theme',
+        ARIA_SLUITEN: 'Close',
+        ARIA_BEL_HUB: 'Call a HUB',
+        HEADER_TITEL: 'HelloFresh Chatbot',
+        MENU_FAQ: 'FAQ',
+        MENU_ROUTE: 'Digital route sheet',
+        MENU_FEEDBACK: 'Feedback',
+        MENU_VOORWAARDEN: 'Terms & conditions',
+        MENU_UITLOGGEN: 'Log out',
+        UITLOGGEN_VRAAG: 'Are you sure you want to log out?',
+        UITLOGGEN_NIET_MEER_VRAGEN: 'Don\'t ask again',
+        UITLOGGEN_TERUG: 'Back to the chatbot',
+        UITLOGGEN_BEVESTIG: 'Log out',
+        DISCLAIMER_TITEL: 'Terms & conditions',
+        DISCLAIMER_TEKST_VOOR: 'Before you continue, we ask you to agree to our',
+        DISCLAIMER_LINK: 'terms & conditions',
+        DISCLAIMER_AKKOORD: 'I agree to the terms & conditions',
+        DISCLAIMER_ONTHOUDEN: 'Don\'t remind me about this for the next 30 days',
+        DISCLAIMER_DOORGAAN: 'Continue',
+        VOORWAARDEN_TITEL: 'Terms & conditions',
+        VOORWAARDEN_SLUITEN: 'Close',
+        VOORWAARDEN_HTML: `
+          <p><strong>Privacy Terms HelloFresh Chatbot</strong></p>
+
+          <p><strong>1. Processing of personal data</strong><br>
+          When you use the HelloFresh Chatbot, we may store the following data:</p>
+          <ul>
+            <li>your business email address;</li>
+            <li>the question you ask the chatbot;</li>
+            <li>the date and time you ask the question;</li>
+            <li>the answer the chatbot gives;</li>
+            <li>whether the chatbot found a suitable answer.</li>
+          </ul>
+
+          <p><strong>2. Purpose of the processing</strong><br>
+          We use this data solely to:</p>
+          <ul>
+            <li>check the quality and reliability of the chatbot;</li>
+            <li>identify missing or incorrect answers;</li>
+            <li>add new questions and answers to the knowledge base;</li>
+            <li>investigate technical problems and errors;</li>
+            <li>contact you about a question you asked, if necessary.</li>
+          </ul>
+          <p>The data is not used for automated decision-making, profiling, performance assessments, or disciplinary measures.</p>
+
+          <p><strong>3. Do not include sensitive data</strong><br>
+          Do not include data in your question that is not necessary, such as:</p>
+          <ul>
+            <li>medical or health data;</li>
+            <li>customer names, addresses, or phone numbers;</li>
+            <li>personal data of colleagues or other people;</li>
+            <li>passwords, access codes, or other confidential information.</li>
+          </ul>
+          <p>If such data is entered anyway, it may end up temporarily in the chatbot log. We remove this data as soon as we recognise it and it is not necessary for the purpose of the processing.</p>
+
+          <p><strong>4. Retention period</strong><br>
+          The email address, the question, the date, and the chatbot's answer are kept for a maximum of 90 days. The data may be deleted sooner when:</p>
+          <ul>
+            <li>the question has been reviewed and is no longer needed;</li>
+            <li>the answer has been added to the knowledge base;</li>
+            <li>the data turns out not to be relevant;</li>
+            <li>the question contains unnecessary or sensitive personal data.</li>
+          </ul>
+          <p>After a maximum of 90 days, the personal data is deleted. After that, we may only retain anonymous statistics, for example how often a particular topic was consulted. These statistics are no longer linked to an individual user.</p>
+
+          <p><strong>5. Access and security</strong><br>
+          Only employees responsible for managing, securing, and improving the chatbot have access to the stored data. We take appropriate technical and organisational measures to protect the data against unauthorised access, loss, alteration, or disclosure.</p>
+
+          <p><strong>6. Sharing of data</strong><br>
+          The data is not sold and not shared with external parties, except when:</p>
+          <ul>
+            <li>this is necessary for the technical operation of the chatbot;</li>
+            <li>a supplier processes data on our behalf;</li>
+            <li>we are legally required to provide data.</li>
+          </ul>
+          <p>When an external supplier processes data on our behalf, appropriate agreements are made about this.</p>
+
+          <p><strong>7. Legal basis</strong><br>
+          The processing takes place because the organisation has a legitimate interest in improving, securing, and managing the internal chatbot and in providing reliable operational information. In doing so, we limit the processing to data that is reasonably necessary for these purposes.</p>
+
+          <p><strong>8. Your privacy rights</strong><br>
+          To the extent permitted by the GDPR, you can request:</p>
+          <ul>
+            <li>access to your stored data;</li>
+            <li>correction of inaccurate data;</li>
+            <li>deletion of your data;</li>
+            <li>restriction of the processing;</li>
+            <li>objection to the processing.</li>
+          </ul>
+          <p>A request can be submitted via: <span class="voorwaarden-placeholder">[privacy email address]</span></p>
+          <p>We may ask for additional information to verify your identity before carrying out a request.</p>
+
+          <p><strong>9. Responsible organisation</strong><br>
+          The controller responsible for this data is:<br>
+          <span class="voorwaarden-placeholder">[full legal name of organisation]</span><br>
+          <span class="voorwaarden-placeholder">[registered address]</span><br>
+          <span class="voorwaarden-placeholder">[privacy email address]</span></p>
+          <p>For questions about these privacy terms, you can contact us via the email address above.</p>
+
+          <p><strong>10. Changes</strong><br>
+          These privacy terms may be updated when the operation of the chatbot or the processing of personal data changes. The most recent version is made available with the chatbot.</p>
+          <p><em>Last updated: 6 August 2026</em></p>
+        `,
+        FEEDBACK_TITEL: 'Your feedback',
+        FEEDBACK_PLACEHOLDER: 'What could be better? Which questions are missing?',
+        FEEDBACK_VERSTUREN: 'Send',
+        FEEDBACK_BEDANKT: 'Thanks for your feedback, we\'ll look into it carefully!',
+        FEEDBACK_SLUITEN: 'Close',
+        FEEDBACK_KIES_STERREN: 'Please choose a star rating first.',
+        FAQ_ZOEK_PLACEHOLDER: 'Search a question...',
+        FAQ_LADEN: 'Loading...',
+        FAQ_KON_NIET_LADEN: 'Could not load the questions, please try again.',
+        FAQ_GEEN_VRAGEN: 'No questions found.',
+        FAQ_ALLE: 'All',
+        ROUTE_TITEL: 'Digital route sheet',
+        ROUTE_PLACEHOLDER: 'Full route number, e.g. DUIAM-260712-6183',
+        ROUTE_ZOEKEN: 'Search',
+        ROUTE_ARIA_VORIGE: 'Previous page',
+        ROUTE_ARIA_VOLGENDE: 'Next page',
+        ROUTE_ARIA_VERGROTEN: 'Zoom in',
+        ROUTE_ONTGRENDEL_TEKST: 'This is a route from yesterday. Enter the unlock code below.',
+        ROUTE_ONTGRENDEL_PLACEHOLDER: 'Unlock code',
+        ROUTE_ONTGRENDEL_ANNULEREN: 'Cancel',
+        ROUTE_ONTGRENDEL_BEVESTIGEN: 'Confirm',
+        ROUTE_GEEN_ROUTE_VANDAAG: 'No route found for today.',
+        ROUTE_WORDT_GELADEN: 'Loading route, this may take a moment...',
+        ROUTE_LEEG_INVOER: 'Enter the full route number, e.g. DUIAM-260712-6183.',
+        ROUTE_BEZIG_ZOEKEN: 'Searching...',
+        ROUTE_DUURT_TE_LANG: 'This is taking too long. Try again, or contact the HUB if this keeps happening.',
+        ROUTE_NA_AFSLUITTIJD: 'The route sheet is no longer available after 23:30, just like the paper version after your shift.',
+        ROUTE_FOUT_PREFIX: 'Error: ',
+        ROUTE_MEERDERE: 'Multiple routes found, please contact the HUB.',
+        ROUTE_GEEN_ROUTE_SUGGESTIES: 'No route found. Did you mean one of these?',
+        ROUTE_RITLIJST_LADEN: 'Loading route sheet...',
+        ROUTE_KON_NIET_OPENEN: 'Could not open the route sheet.',
+        ROUTE_DOWNLOAD: 'Download route sheet',
+        ROUTE_PAGINA: 'Page {n} of {totaal}',
+        CHAT_WELKOM: 'Hi! Ask your question and I\'ll try to give you an answer right away, or click the 3 lines in the top left for the most frequently asked questions.',
+        CHAT_VOORGESTELDE_CATEGORIEEN: 'Suggested categories:',
+        CHAT_GEEN_VRAGEN_IN_CATEGORIE: 'I don\'t have any questions under "{categorie}" yet. Feel free to ask your own question.',
+        CHAT_VRAGEN_OVER: 'Questions about {categorie}:',
+        CHAT_GEEN_ANTWOORD: 'I don\'t have an answer for that, please contact the HUB.',
+        CHAT_BEDOEL_JE: 'I couldn\'t find an exact answer for that. Did you perhaps mean one of these questions?',
+        CHAT_VRAAG_GEANNULEERD: 'Question cancelled.',
+        CHAT_ANNULEER_ARIA: 'Cancel question',
+        CHAT_INPUT_PLACEHOLDER: 'Type your question...',
+        CHAT_VERSTUUR: 'Send'
+      }
+    };
+
+    const STARTCATEGORIEEN_PER_TAAL = {
+      nl: ['Koeling', 'Levering', 'Algemeen'],
+      en: ['Cooling', 'Delivery', 'General']
+    };
+
+    let huidigeTaal = 'nl';
+
+    function t(sleutel, placeholders) {
+      const tabel = VERTALINGEN[huidigeTaal] || VERTALINGEN.nl;
+      let tekst = (sleutel in tabel) ? tabel[sleutel] : (VERTALINGEN.nl[sleutel] || sleutel);
+      if (placeholders) {
+        Object.keys(placeholders).forEach(function(naam) {
+          tekst = tekst.split('{' + naam + '}').join(placeholders[naam]);
+        });
+      }
+      return tekst;
+    }
+
+    function haalVoorkeurTaal() {
+      try {
+        const opgeslagen = localStorage.getItem(TAAL_KEY);
+        if (opgeslagen === 'nl' || opgeslagen === 'en') return opgeslagen;
+      } catch (e) {}
+      return 'nl';
+    }
+
+    // Past alle statische tekst in de al-geladen schermen aan naar de huidige
+    // taal. Wordt bij het opstarten éénmaal aangeroepen en daarna elke keer
+    // als de chauffeur op een ander vlaggetje klikt. Berichten die al in de
+    // chat staan, worden bewust niet met terugwerkende kracht vertaald (net
+    // als bij elke andere chat-app) - alleen nieuwe berichten/schermen tonen
+    // de nieuw gekozen taal.
+    function pasTaalToe() {
+      document.documentElement.setAttribute('lang', huidigeTaal);
+
+      document.querySelectorAll('.taal-knop').forEach(function(knop) {
+        knop.classList.toggle('actief', knop.getAttribute('data-taal') === huidigeTaal);
+      });
+
+      const zetTekst = function(id, tekst) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = tekst;
+      };
+      const zetHtml = function(id, html) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      };
+      const zetPlaceholder = function(id, tekst) {
+        const el = document.getElementById(id);
+        if (el) el.placeholder = tekst;
+      };
+      const zetAria = function(id, tekst) {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('aria-label', tekst);
+      };
+
+      zetPlaceholder('loginId', t('LOGIN_PLACEHOLDER_EMAIL'));
+      zetTekst('loginOnthoudenTekst', t('LOGIN_ONTHOUDEN'));
+      if (!loginBtnEl.disabled) zetTekst('loginBtnTekst', t('LOGIN_BTN'));
+      zetTekst('loginHint', t('LOGIN_HINT'));
+      zetHtml('loginFooter', t('LOGIN_FOOTER'));
+      zetTekst('verificatieTitel', t('VERIFICATIE_TITEL'));
+      zetTekst('verificatieHint', t('VERIFICATIE_HINT'));
+      if (!verificatieBtnEl.disabled) zetTekst('verificatieBtnTekst', t('VERIFICATIE_BTN'));
+      zetTekst('verificatieOpnieuwBtn', t('VERIFICATIE_OPNIEUW'));
+
+      zetAria('menuKnop', t('ARIA_MENU'));
+      document.querySelectorAll('.thema-knop').forEach(function(knop) { knop.setAttribute('aria-label', t('ARIA_THEMA')); });
+      zetAria('faqSluiten', t('ARIA_SLUITEN'));
+      zetAria('routeSluiten', t('ARIA_SLUITEN'));
+      zetAria('routeVergrootSluiten', t('ARIA_SLUITEN'));
+      zetAria('belKnop', t('ARIA_BEL_HUB'));
+      zetAria('routeVergrootVorige', t('ROUTE_ARIA_VORIGE'));
+      zetAria('routeVergrootVolgende', t('ROUTE_ARIA_VOLGENDE'));
+
+      zetTekst('faqMenuItem', t('MENU_FAQ'));
+      zetTekst('routeMenuItem', t('MENU_ROUTE'));
+      zetTekst('feedbackMenuItem', t('MENU_FEEDBACK'));
+      zetTekst('voorwaardenMenuItem', t('MENU_VOORWAARDEN'));
+      zetTekst('uitloggenMenuItem', t('MENU_UITLOGGEN'));
+
+      zetTekst('uitloggenVraagTekst', t('UITLOGGEN_VRAAG'));
+      zetTekst('uitloggenNietMeerVragenTekst', t('UITLOGGEN_NIET_MEER_VRAGEN'));
+      zetTekst('uitloggenAnnuleren', t('UITLOGGEN_TERUG'));
+      zetTekst('uitloggenBevestigen', t('UITLOGGEN_BEVESTIG'));
+
+      zetTekst('disclaimerTitel', t('DISCLAIMER_TITEL'));
+      zetTekst('disclaimerTekstVoor', t('DISCLAIMER_TEKST_VOOR'));
+      zetTekst('disclaimerLezenBtn', t('DISCLAIMER_LINK'));
+      zetTekst('disclaimerAkkoordTekst', t('DISCLAIMER_AKKOORD'));
+      zetTekst('disclaimerOnthoudenTekst', t('DISCLAIMER_ONTHOUDEN'));
+      zetTekst('disclaimerDoorgaanBtn', t('DISCLAIMER_DOORGAAN'));
+
+      zetTekst('voorwaardenTitel', t('VOORWAARDEN_TITEL'));
+      zetHtml('voorwaardenTekst', t('VOORWAARDEN_HTML'));
+      zetTekst('voorwaardenSluitenBtn', t('VOORWAARDEN_SLUITEN'));
+
+      zetTekst('feedbackTitel', t('FEEDBACK_TITEL'));
+      zetPlaceholder('feedbackTekst', t('FEEDBACK_PLACEHOLDER'));
+      zetTekst('feedbackVersturenBtn', t('FEEDBACK_VERSTUREN'));
+      zetTekst('feedbackBedankt', t('FEEDBACK_BEDANKT'));
+      zetTekst('feedbackSluiten', t('FEEDBACK_SLUITEN'));
+
+      zetPlaceholder('faqZoek', t('FAQ_ZOEK_PLACEHOLDER'));
+
+      zetTekst('routeHeaderTitel', t('ROUTE_TITEL'));
+      zetPlaceholder('routeInput', t('ROUTE_PLACEHOLDER'));
+      zetTekst('routeZoekBtn', t('ROUTE_ZOEKEN'));
+      zetTekst('routeOntgrendelTekst', t('ROUTE_ONTGRENDEL_TEKST'));
+      zetPlaceholder('routeOntgrendelPopupInvoer', t('ROUTE_ONTGRENDEL_PLACEHOLDER'));
+      zetTekst('routeOntgrendelAnnuleren', t('ROUTE_ONTGRENDEL_ANNULEREN'));
+      zetTekst('routeOntgrendelBevestigen', t('ROUTE_ONTGRENDEL_BEVESTIGEN'));
+
+      zetPlaceholder('vraagInput', t('CHAT_INPUT_PLACEHOLDER'));
+      zetTekst('verstuurBtn', t('CHAT_VERSTUUR'));
+    }
+
+    function wisselTaal(nieuweTaal) {
+      if (nieuweTaal !== 'nl' && nieuweTaal !== 'en') return;
+      huidigeTaal = nieuweTaal;
+      try { localStorage.setItem(TAAL_KEY, huidigeTaal); } catch (e) {}
+      pasTaalToe();
+    }
+
+    huidigeTaal = haalVoorkeurTaal();
+    document.querySelectorAll('.taal-knop').forEach(function(knop) {
+      knop.addEventListener('click', function() { wisselTaal(knop.getAttribute('data-taal')); });
+    });
+
     const HUB_NUMMERS = [
       { naam: 'HUB Duiven', nummer: '0852020125' },
       { naam: 'HUB Etten-Leur', nummer: '0852020126' },
@@ -1396,8 +1904,6 @@
 
     let alleVragen = [];
 
-    const GEEN_ANTWOORD_TEKST = 'Hier heb ik geen antwoord op, neem contact op met de HUB.';
-
     function appsScriptCall(actie, argumenten) {
       return fetch('/api', {
         method: 'POST',
@@ -1425,7 +1931,7 @@
     // gewoon werkt.
     function foutmeldingVoor(fout, standaardTekst) {
       if (fout && fout.traag) {
-        return 'De verbinding was even traag, probeer het nogmaals.';
+        return t('TRAAG_VERBINDING');
       }
       return standaardTekst;
     }
@@ -1548,21 +2054,23 @@
     const verificatieFoutEl = document.getElementById('verificatieFout');
     const verificatieOpnieuwBtnEl = document.getElementById('verificatieOpnieuwBtn');
 
+    // Nu alle schermen waar pasTaalToe() naar verwijst bestaan/gedeclareerd
+    // zijn, de opgeslagen (of gedetecteerde) taalvoorkeur ook echt toepassen.
+    pasTaalToe();
+
     function startChat() {
-      voegBerichtToe('Hi! Stel je vraag, dan probeer ik direct een antwoord te geven of klik links bovenin op de 3 streepjes voor de meest gestelde vragen.', 'bot');
+      voegBerichtToe(t('CHAT_WELKOM'), 'bot');
       toonStartCategorieen();
     }
 
     // Snelkeuze-categorieën direct onder het welkomstbericht - scheelt een
     // chauffeur die niet precies weet hoe hij zijn vraag moet formuleren het
     // eerst zelf moeten intypen of het menu linksboven moeten opzoeken.
-    const STARTCATEGORIEEN = ['Koeling', 'Levering', 'Algemeen'];
-
     function toonStartCategorieen() {
       const optiesEl = document.createElement('div');
       optiesEl.className = 'opties';
 
-      STARTCATEGORIEEN.forEach(function(categorie) {
+      (STARTCATEGORIEEN_PER_TAAL[huidigeTaal] || STARTCATEGORIEEN_PER_TAAL.nl).forEach(function(categorie) {
         const btn = document.createElement('button');
         btn.className = 'optieBtn';
         btn.textContent = categorie;
@@ -1576,7 +2084,7 @@
       const bubble = document.createElement('div');
       bubble.className = 'bericht bot';
       const titelEl = document.createElement('div');
-      titelEl.textContent = 'Voorgestelde categorieën';
+      titelEl.textContent = t('CHAT_VOORGESTELDE_CATEGORIEEN');
       bubble.appendChild(titelEl);
       bubble.appendChild(optiesEl);
       berichtenEl.appendChild(bubble);
@@ -1587,7 +2095,7 @@
       voegBerichtToe(categorie, 'gebruiker');
       toonTypingIndicator();
 
-      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken])
+      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken, huidigeTaal])
         .then(function(resultaat) {
           verwijderTypingIndicator();
 
@@ -1603,7 +2111,7 @@
           });
 
           if (!vragenInCategorie.length) {
-            voegBerichtToe('Hier heb ik nog geen vragen onder "' + categorie + '" staan. Stel gerust je eigen vraag.', 'bot');
+            voegBerichtToe(t('CHAT_GEEN_VRAGEN_IN_CATEGORIE', { categorie: categorie }), 'bot');
             return;
           }
 
@@ -1624,7 +2132,7 @@
           const bubble = document.createElement('div');
           bubble.className = 'bericht bot';
           const titelEl = document.createElement('div');
-          titelEl.textContent = 'Vragen over ' + categorie + ':';
+          titelEl.textContent = t('CHAT_VRAGEN_OVER', { categorie: categorie });
           bubble.appendChild(titelEl);
           bubble.appendChild(optiesEl);
           berichtenEl.appendChild(bubble);
@@ -1632,7 +2140,7 @@
         })
         .catch(function() {
           verwijderTypingIndicator();
-          voegBerichtToe('Kon de vragen niet laden, probeer het nog eens.', 'bot');
+          voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
         });
     }
 
@@ -1671,7 +2179,7 @@
       huidigeHub = null;
       huidigeApparaatToken = '';
       wisApparaatTokenLokaal();
-      toonLogin('Je sessie is verlopen, log opnieuw in.');
+      toonLogin(t('SESSIE_VERLOPEN'));
     }
 
     function toonVerificatieScherm() {
@@ -1690,16 +2198,16 @@
     // en getypt.
     function verstuurVerificatiecode() {
       verificatieOpnieuwBtnEl.disabled = true;
-      appsScriptCall('verstuurVerificatiecode', [idInVerificatie])
+      appsScriptCall('verstuurVerificatiecode', [idInVerificatie, huidigeTaal])
         .then(function(resultaat) {
           verificatieOpnieuwBtnEl.disabled = false;
           if (!resultaat || !resultaat.verstuurd) {
-            verificatieFoutEl.textContent = (resultaat && resultaat.fout) || 'Kon geen verificatiecode versturen.';
+            verificatieFoutEl.textContent = (resultaat && resultaat.fout) || t('VERIFICATIE_KON_NIET_VERSTUREN');
           }
         })
         .catch(function() {
           verificatieOpnieuwBtnEl.disabled = false;
-          verificatieFoutEl.textContent = 'Er ging iets mis bij het versturen van de code, probeer het nogmaals.';
+          verificatieFoutEl.textContent = t('VERIFICATIE_FOUT_VERSTUREN');
         });
     }
 
@@ -1710,7 +2218,7 @@
         return;
       }
 
-      appsScriptCall('checkInloggen', [opgeslagen.id, opgeslagen.token])
+      appsScriptCall('checkInloggen', [opgeslagen.id, opgeslagen.token, huidigeTaal])
         .then(function(resultaat) {
           if (resultaat && resultaat.geldig) {
             voltooiGeslaagdeLogin(opgeslagen.id, opgeslagen.token, resultaat.voornaam, resultaat.hub);
@@ -1732,13 +2240,13 @@
 
       loginBtnEl.disabled = true;
       loginFoutEl.textContent = '';
-      loginBtnTekstEl.textContent = 'Bezig met inloggen...';
+      loginBtnTekstEl.textContent = t('LOGIN_BTN_BEZIG');
       loginSpinnerEl.classList.remove('verborgen');
 
-      appsScriptCall('checkInloggen', [idCode, opgeslagenToken])
+      appsScriptCall('checkInloggen', [idCode, opgeslagenToken, huidigeTaal])
         .then(function(resultaat) {
           loginBtnEl.disabled = false;
-          loginBtnTekstEl.textContent = 'Inloggen';
+          loginBtnTekstEl.textContent = t('LOGIN_BTN');
           loginSpinnerEl.classList.add('verborgen');
           if (resultaat && resultaat.geldig) {
             voltooiGeslaagdeLogin(idCode, opgeslagenToken, resultaat.voornaam, resultaat.hub);
@@ -1748,16 +2256,16 @@
             toonVerificatieScherm();
             verstuurVerificatiecode();
           } else if (resultaat && resultaat.status === 'inactief') {
-            toonLogin('Dit e-mailadres is nog niet actief. Neem contact op met de HUB.');
+            toonLogin(t('LOGIN_INACTIEF'));
           } else {
-            toonLogin('Ongeldig e-mailadres, probeer het nogmaals.');
+            toonLogin(t('LOGIN_ONGELDIG'));
           }
         })
         .catch(function(fout) {
           loginBtnEl.disabled = false;
-          loginBtnTekstEl.textContent = 'Inloggen';
+          loginBtnTekstEl.textContent = t('LOGIN_BTN');
           loginSpinnerEl.classList.add('verborgen');
-          toonLogin(foutmeldingVoor(fout, 'Er ging iets mis, probeer het nogmaals.'));
+          toonLogin(foutmeldingVoor(fout, t('ER_GING_IETS_MIS')));
         });
     });
 
@@ -1771,17 +2279,17 @@
 
       verificatieBtnEl.disabled = true;
       verificatieFoutEl.textContent = '';
-      verificatieBtnTekstEl.textContent = 'Bezig met controleren...';
+      verificatieBtnTekstEl.textContent = t('VERIFICATIE_BTN_BEZIG');
       verificatieSpinnerEl.classList.remove('verborgen');
 
-      appsScriptCall('verifieerCode', [idInVerificatie, code])
+      appsScriptCall('verifieerCode', [idInVerificatie, code, huidigeTaal])
         .then(function(verificatieResultaat) {
           verificatieBtnEl.disabled = false;
-          verificatieBtnTekstEl.textContent = 'Bevestigen';
+          verificatieBtnTekstEl.textContent = t('VERIFICATIE_BTN');
           verificatieSpinnerEl.classList.add('verborgen');
 
           if (!verificatieResultaat || !verificatieResultaat.geldig) {
-            verificatieFoutEl.textContent = (verificatieResultaat && verificatieResultaat.fout) || 'Onjuiste code.';
+            verificatieFoutEl.textContent = (verificatieResultaat && verificatieResultaat.fout) || t('ONJUISTE_CODE');
             return;
           }
 
@@ -1796,9 +2304,9 @@
         })
         .catch(function(fout) {
           verificatieBtnEl.disabled = false;
-          verificatieBtnTekstEl.textContent = 'Bevestigen';
+          verificatieBtnTekstEl.textContent = t('VERIFICATIE_BTN');
           verificatieSpinnerEl.classList.add('verborgen');
-          verificatieFoutEl.textContent = foutmeldingVoor(fout, 'Er ging iets mis, probeer het nogmaals.');
+          verificatieFoutEl.textContent = foutmeldingVoor(fout, t('ER_GING_IETS_MIS'));
         });
     });
 
@@ -1869,7 +2377,7 @@
       if (onAnnuleer) {
         const annuleerBtn = document.createElement('button');
         annuleerBtn.className = 'typing-annuleer-btn';
-        annuleerBtn.setAttribute('aria-label', 'Vraag annuleren');
+        annuleerBtn.setAttribute('aria-label', t('CHAT_ANNULEER_ARIA'));
         annuleerBtn.textContent = '✕';
         annuleerBtn.addEventListener('click', onAnnuleer);
         bubble.appendChild(annuleerBtn);
@@ -1895,7 +2403,7 @@
       const heeftSuggesties = !!(stap && stap.suggesties && stap.suggesties.length);
 
       if (!heeftTekst && !heeftOpties && !heeftSuggesties) {
-        voegBerichtToe(GEEN_ANTWOORD_TEKST, 'bot');
+        voegBerichtToe(t('CHAT_GEEN_ANTWOORD'), 'bot');
         return;
       }
 
@@ -1908,7 +2416,7 @@
         bubble.appendChild(tekstEl);
       } else if (heeftSuggesties) {
         const tekstEl = document.createElement('div');
-        tekstEl.textContent = 'Hier heb ik geen exact antwoord op gevonden. Bedoel je misschien een van deze vragen?';
+        tekstEl.textContent = t('CHAT_BEDOEL_JE');
         bubble.appendChild(tekstEl);
       }
 
@@ -1927,7 +2435,7 @@
             toonTypingIndicator();
 
             const startTijd = Date.now();
-            appsScriptCall('haalStap', [huidigeId, huidigeApparaatToken, optie.id])
+            appsScriptCall('haalStap', [huidigeId, huidigeApparaatToken, optie.id, huidigeTaal])
               .then(async function(volgendeStap) {
                 const verstreken = Date.now() - startTijd;
                 if (verstreken < 1000) await sleep(1000 - verstreken);
@@ -1936,7 +2444,7 @@
               })
               .catch(function() {
                 verwijderTypingIndicator();
-                voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+                voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
               });
           });
           optiesEl.appendChild(btn);
@@ -1984,7 +2492,7 @@
         // toch nog binnenkomend antwoord genegeerd wordt (zie hieronder).
         vraagVolgnummer++;
         verwijderTypingIndicator();
-        voegBerichtToe('Vraag geannuleerd.', 'bot');
+        voegBerichtToe(t('CHAT_VRAAG_GEANNULEERD'), 'bot');
         inputEl.disabled = false;
         knopEl.disabled = false;
         inputEl.focus();
@@ -1992,7 +2500,7 @@
 
       const startTijd = Date.now();
 
-      appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst])
+      appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst, huidigeTaal])
         .then(async function(stap) {
           const verstreken = Date.now() - startTijd;
           if (verstreken < 1000) {
@@ -2008,7 +2516,7 @@
         .catch(function() {
           if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
-          voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+          voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
           inputEl.value = tekst;
           inputEl.disabled = false;
           knopEl.disabled = false;
@@ -2126,11 +2634,11 @@
 
     feedbackVersturenBtnEl.addEventListener('click', function() {
       if (feedbackGekozenSterren < 1) {
-        feedbackFoutEl.textContent = 'Kies eerst een aantal sterren.';
+        feedbackFoutEl.textContent = t('FEEDBACK_KIES_STERREN');
         return;
       }
 
-      appsScriptCall('verstuurFeedback', [huidigeId, huidigeApparaatToken, feedbackGekozenSterren, feedbackTekstEl.value.trim()])
+      appsScriptCall('verstuurFeedback', [huidigeId, huidigeApparaatToken, feedbackGekozenSterren, feedbackTekstEl.value.trim(), huidigeTaal])
         .catch(function() {});
 
       feedbackFormEl.classList.add('verborgen');
@@ -2158,11 +2666,11 @@
       menuAchtergrondEl.classList.add('verborgen');
       faqOverlayEl.classList.remove('verborgen');
       faqZoekEl.value = '';
-      actieveCategorie = 'Alle';
+      actieveCategorie = t('FAQ_ALLE');
       faqCategorieenEl.innerHTML = '';
-      faqLijstEl.innerHTML = '<div class="faq-melding">Laden...</div>';
+      faqLijstEl.innerHTML = '<div class="faq-melding">' + t('FAQ_LADEN') + '</div>';
 
-      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken])
+      appsScriptCall('haalAlleVragen', [huidigeId, huidigeApparaatToken, huidigeTaal])
         .then(function(resultaat) {
           if (resultaat && resultaat.ongeldigeSessie) {
             faqOverlayEl.classList.add('verborgen');
@@ -2179,7 +2687,7 @@
           pasFaqFilterToe();
         })
         .catch(function() {
-          faqLijstEl.innerHTML = '<div class="faq-melding">Kon de vragen niet laden, probeer het nog eens.</div>';
+          faqLijstEl.innerHTML = '<div class="faq-melding">' + t('FAQ_KON_NIET_LADEN') + '</div>';
         });
     });
 
@@ -2190,7 +2698,7 @@
     faqZoekEl.addEventListener('input', pasFaqFilterToe);
 
     function toonCategorieChips() {
-      const categorieen = ['Alle'];
+      const categorieen = [t('FAQ_ALLE')];
       alleVragen.forEach(function(v) {
         if (categorieen.indexOf(v.categorie) === -1) categorieen.push(v.categorie);
       });
@@ -2213,7 +2721,7 @@
       const zoekterm = faqZoekEl.value.toLowerCase();
       const gefilterd = alleVragen.filter(function(v) {
         const matchtZoekterm = v.vraag.toLowerCase().indexOf(zoekterm) !== -1;
-        const matchtCategorie = actieveCategorie === 'Alle' || v.categorie === actieveCategorie;
+        const matchtCategorie = actieveCategorie === t('FAQ_ALLE') || v.categorie === actieveCategorie;
         return matchtZoekterm && matchtCategorie;
       });
       toonFaqLijst(gefilterd);
@@ -2223,7 +2731,7 @@
       faqLijstEl.innerHTML = '';
 
       if (!vragen.length) {
-        faqLijstEl.innerHTML = '<div class="faq-melding">Geen vragen gevonden.</div>';
+        faqLijstEl.innerHTML = '<div class="faq-melding">' + t('FAQ_GEEN_VRAGEN') + '</div>';
         return;
       }
 
@@ -2245,7 +2753,7 @@
 
       const startTijd = Date.now();
 
-      appsScriptCall('haalAntwoordOpRij', [huidigeId, huidigeApparaatToken, vraagObj.rij])
+      appsScriptCall('haalAntwoordOpRij', [huidigeId, huidigeApparaatToken, vraagObj.rij, huidigeTaal])
         .then(async function(stap) {
           const verstreken = Date.now() - startTijd;
           if (verstreken < 1000) await sleep(1000 - verstreken);
@@ -2254,7 +2762,7 @@
         })
         .catch(function() {
           verwijderTypingIndicator();
-          voegBerichtToe('Er ging iets mis, probeer het nog eens.', 'bot');
+          voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
         });
     }
 
@@ -2397,7 +2905,7 @@
 
     routeOntgrendelAnnulerenEl.addEventListener('click', function() {
       verbergRouteOntgrendelPopup();
-      routeResultaatEl.innerHTML = '<div class="route-melding">Geen route gevonden voor vandaag.</div>';
+      routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_GEEN_ROUTE_VANDAAG') + '</div>';
     });
 
     routeOntgrendelBevestigenEl.addEventListener('click', function() {
@@ -2405,7 +2913,7 @@
       if (!code || !routeWachtendRouteNummer) return;
       routeOntgrendelBevestigenEl.disabled = true;
       routeOntgrendelPopupFoutEl.style.color = 'var(--ink-muted)';
-      routeOntgrendelPopupFoutEl.textContent = 'Route wordt geladen, dit kan even duren...';
+      routeOntgrendelPopupFoutEl.textContent = t('ROUTE_WORDT_GELADEN');
       zoekRoute(routeWachtendRouteNummer, code);
     });
 
@@ -2426,20 +2934,20 @@
       if (!getrimd) return;
 
       if (!VOLLEDIG_ROUTENUMMER_PATROON.test(getrimd)) {
-        routeResultaatEl.innerHTML = '<div class="route-melding">Vul het volledige routenummer in, bijv. DUIAM-260712-6183.</div>';
+        routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_LEEG_INVOER') + '</div>';
         return;
       }
 
       const ditToken = ++routeZoekToken;
-      routeResultaatEl.innerHTML = '<div class="route-melding">Bezig met zoeken...</div>';
+      routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_BEZIG_ZOEKEN') + '</div>';
 
       const timeoutId = setTimeout(function() {
         if (ditToken !== routeZoekToken) return;
         routeOntgrendelBevestigenEl.disabled = false;
-        routeResultaatEl.innerHTML = '<div class="route-melding">Dit duurt te lang. Probeer het nog eens, of neem contact op met de HUB als dit blijft gebeuren.</div>';
+        routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_DUURT_TE_LANG') + '</div>';
       }, ROUTE_ZOEK_TIMEOUT_MS);
 
-      appsScriptCall('haalRoutePdf', [huidigeId, huidigeApparaatToken, getrimd, ontgrendelcode || ''])
+      appsScriptCall('haalRoutePdf', [huidigeId, huidigeApparaatToken, getrimd, ontgrendelcode || '', huidigeTaal])
         .then(function(resultaat) {
           clearTimeout(timeoutId);
           if (ditToken !== routeZoekToken) return;
@@ -2466,11 +2974,11 @@
 
           if (!resultaat || !resultaat.gevonden) {
             if (resultaat && resultaat.verlopen) {
-              routeResultaatEl.innerHTML = '<div class="route-melding">De ritlijst is na 23:30 uur niet meer beschikbaar, net als de papieren versie na je dienst.</div>';
+              routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_NA_AFSLUITTIJD') + '</div>';
               return;
             }
             if (resultaat && resultaat.fout) {
-              routeResultaatEl.innerHTML = '<div class="route-melding">Fout: ' + resultaat.fout + '</div>';
+              routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_FOUT_PREFIX') + resultaat.fout + '</div>';
               return;
             }
             if (resultaat && resultaat.suggesties && resultaat.suggesties.length) {
@@ -2479,7 +2987,7 @@
             }
             const meerdere = resultaat && resultaat.aantal > 1;
             routeResultaatEl.innerHTML = '<div class="route-melding">' +
-              (meerdere ? 'Meerdere routes gevonden, neem contact op met de HUB.' : 'Geen route gevonden voor vandaag.') +
+              (meerdere ? t('ROUTE_MEERDERE') : t('ROUTE_GEEN_ROUTE_VANDAAG')) +
               '</div>';
             return;
           }
@@ -2489,12 +2997,12 @@
           clearTimeout(timeoutId);
           if (ditToken !== routeZoekToken) return;
           routeOntgrendelBevestigenEl.disabled = false;
-          routeResultaatEl.innerHTML = '<div class="route-melding">Er ging iets mis, probeer het nog eens.</div>';
+          routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ER_GING_IETS_MIS') + '</div>';
         });
     }
 
     function toonRouteSuggesties(suggesties) {
-      routeResultaatEl.innerHTML = '<div class="route-melding">Geen route gevonden. Bedoel je een van deze?</div>';
+      routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_GEEN_ROUTE_SUGGESTIES') + '</div>';
 
       suggesties.forEach(function(suggestie) {
         const btn = document.createElement('button');
@@ -2511,7 +3019,7 @@
     const AANTAL_TOEGESTANE_PAGINAS = 2;
 
     async function toonRoutePdf(pdfBase64, bestandsNaam) {
-      routeResultaatEl.innerHTML = '<div class="route-melding">Ritlijst wordt geladen...</div>';
+      routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_RITLIJST_LADEN') + '</div>';
 
       if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -2533,7 +3041,7 @@
 
         toonRoutePager(canvasLijst, bestandsNaam);
       } catch (e) {
-        routeResultaatEl.innerHTML = '<div class="route-melding">Kon de ritlijst niet openen.</div>';
+        routeResultaatEl.innerHTML = '<div class="route-melding">' + t('ROUTE_KON_NIET_OPENEN') + '</div>';
       }
     }
 
@@ -2560,7 +3068,7 @@
       const vorigeBtnEl = document.createElement('button');
       vorigeBtnEl.className = 'route-pagina-nav-btn';
       vorigeBtnEl.textContent = '‹';
-      vorigeBtnEl.setAttribute('aria-label', 'Vorige pagina');
+      vorigeBtnEl.setAttribute('aria-label', t('ROUTE_ARIA_VORIGE'));
 
       const labelEl = document.createElement('span');
       labelEl.className = 'route-pagina-label';
@@ -2568,11 +3076,11 @@
       const volgendeBtnEl = document.createElement('button');
       volgendeBtnEl.className = 'route-pagina-nav-btn';
       volgendeBtnEl.textContent = '›';
-      volgendeBtnEl.setAttribute('aria-label', 'Volgende pagina');
+      volgendeBtnEl.setAttribute('aria-label', t('ROUTE_ARIA_VOLGENDE'));
 
       const vergrootBtnEl = document.createElement('button');
       vergrootBtnEl.className = 'route-vergroot-knop';
-      vergrootBtnEl.setAttribute('aria-label', 'Vergroten');
+      vergrootBtnEl.setAttribute('aria-label', t('ROUTE_ARIA_VERGROTEN'));
       vergrootBtnEl.innerHTML = VERGROOT_SVG;
 
       navEl.appendChild(vorigeBtnEl);
@@ -2584,7 +3092,7 @@
       paginaContainerEl.className = 'route-pagina-container';
 
       routeVernieuwWeergave = function() {
-        const label = 'Pagina ' + (routeHuidigePaginaIndex + 1) + ' van ' + routeCanvasLijst.length;
+        const label = t('ROUTE_PAGINA', { n: routeHuidigePaginaIndex + 1, totaal: routeCanvasLijst.length });
         const isEerste = routeHuidigePaginaIndex === 0;
         const isLaatste = routeHuidigePaginaIndex === routeCanvasLijst.length - 1;
 
@@ -2637,7 +3145,7 @@
       const downloadBtnEl = document.createElement('button');
       downloadBtnEl.id = 'routeDownloadBtn';
       downloadBtnEl.className = 'route-btn';
-      downloadBtnEl.textContent = 'Download ritlijst';
+      downloadBtnEl.textContent = t('ROUTE_DOWNLOAD');
       downloadBtnEl.addEventListener('click', function() {
         downloadBtnEl.disabled = true;
         bouwEnDownloadPdf(routeCanvasLijst, bestandsNaam).finally(function() {
