@@ -1593,8 +1593,8 @@
         CHAT_ANNULEER_ARIA: 'Vraag annuleren',
         CHAT_INPUT_PLACEHOLDER: 'Typ je vraag...',
         CHAT_VERSTUUR: 'Verstuur',
-        TAAL_SUGGESTIE: 'Deze vraag lijkt in het Engels te zijn. Wil je overschakelen naar Engels?',
-        TAAL_SUGGESTIE_KNOP: 'Overschakelen naar Engels'
+        TAAL_SUGGESTIE: 'Deze vraag lijkt in het Nederlands te zijn. Wil je overschakelen naar Nederlands?',
+        TAAL_SUGGESTIE_KNOP: 'Overschakelen naar Nederlands'
       },
       en: {
         LOGIN_PLACEHOLDER_EMAIL: 'Enter your MobileNXT email address',
@@ -1765,8 +1765,8 @@
         CHAT_ANNULEER_ARIA: 'Cancel question',
         CHAT_INPUT_PLACEHOLDER: 'Type your question...',
         CHAT_VERSTUUR: 'Send',
-        TAAL_SUGGESTIE: 'This question looks like it\'s in Dutch. Would you like to switch to Dutch?',
-        TAAL_SUGGESTIE_KNOP: 'Switch to Dutch'
+        TAAL_SUGGESTIE: 'This question looks like it\'s in English. Would you like to switch to English?',
+        TAAL_SUGGESTIE_KNOP: 'Switch to English'
       }
     };
 
@@ -1777,8 +1777,8 @@
 
     let huidigeTaal = 'nl';
 
-    function t(sleutel, placeholders) {
-      const tabel = VERTALINGEN[huidigeTaal] || VERTALINGEN.nl;
+    function tIn(taal, sleutel, placeholders) {
+      const tabel = VERTALINGEN[taal] || VERTALINGEN.nl;
       let tekst = (sleutel in tabel) ? tabel[sleutel] : (VERTALINGEN.nl[sleutel] || sleutel);
       if (placeholders) {
         Object.keys(placeholders).forEach(function(naam) {
@@ -1786,6 +1786,10 @@
         });
       }
       return tekst;
+    }
+
+    function t(sleutel, placeholders) {
+      return tIn(huidigeTaal, sleutel, placeholders);
     }
 
     function haalVoorkeurTaal() {
@@ -2554,19 +2558,23 @@
       return nlScore > enScore ? 'nl' : 'en';
     }
 
+    // Bewust in de vóórgestelde (dus vermoedelijke) taal van de vraag zelf
+    // getoond, niet in de huidige interface-taal - wie een Engelse vraag
+    // stelt terwijl de chat nog op Nederlands staat, kan waarschijnlijk ook
+    // beter een Engelse melding lezen dan een Nederlandse.
     function toonTaalSuggestie(voorgesteldeTaal, oorspronkelijkeVraag) {
       const bubble = document.createElement('div');
       bubble.className = 'bericht bot';
 
       const tekstEl = document.createElement('div');
-      tekstEl.textContent = t('TAAL_SUGGESTIE');
+      tekstEl.textContent = tIn(voorgesteldeTaal, 'TAAL_SUGGESTIE');
       bubble.appendChild(tekstEl);
 
       const optiesEl = document.createElement('div');
       optiesEl.className = 'opties';
       const btn = document.createElement('button');
       btn.className = 'optieBtn';
-      btn.textContent = t('TAAL_SUGGESTIE_KNOP');
+      btn.textContent = tIn(voorgesteldeTaal, 'TAAL_SUGGESTIE_KNOP');
       btn.addEventListener('click', function() {
         optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
         wisselTaal(voorgesteldeTaal);
@@ -2629,18 +2637,21 @@
           }
           if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
-          toonStap(stap);
 
           // Geen antwoord (en dus ook geen keuzeknoppen/suggesties) gevonden?
-          // Dan checken of de getypte vraag misschien gewoon in de andere
-          // taal staat dan de huidige interface - zo niet, blijft het bij de
-          // gewone "geen antwoord"-melding uit toonStap hierboven.
+          // Dan eerst checken of de getypte vraag misschien gewoon in de
+          // andere taal staat dan de huidige interface. Zo ja, toon dan
+          // ALLEEN die taal-suggestie (in plaats van ook nog de generieke
+          // "geen antwoord, bel de HUB"-melding) - wie een Engelse vraag
+          // stelt heeft niets aan een Nederlandse "geen antwoord"-melding
+          // vlak vóór het aanbod om over te schakelen naar Engels.
           const geenAntwoordGevonden = !(stap && (stap.tekst || (stap.opties && stap.opties.length) || (stap.suggesties && stap.suggesties.length)));
-          if (geenAntwoordGevonden) {
-            const gegokteTaal = gokTaalVanTekst(tekst);
-            if (gegokteTaal && gegokteTaal !== huidigeTaal) {
-              toonTaalSuggestie(gegokteTaal, tekst);
-            }
+          const gegokteTaal = geenAntwoordGevonden ? gokTaalVanTekst(tekst) : null;
+
+          if (geenAntwoordGevonden && gegokteTaal && gegokteTaal !== huidigeTaal) {
+            toonTaalSuggestie(gegokteTaal, tekst);
+          } else {
+            toonStap(stap);
           }
 
           inputEl.disabled = false;
