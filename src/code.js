@@ -12,11 +12,13 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVsc2KHocAkG
 // Eén cache-slot per taal - de NL- en EN-vragenlijst zijn twee losse Sheet-
 // tabs in Code.gs (zie haalAntwoordenSheetNaam daar) en horen dus ook los
 // gecacht te worden.
-let faqCacheGeheugen = { nl: null, en: null };
+let faqCacheGeheugen = { nl: null, en: null, fr: null };
 const FAQ_CACHE_SECONDEN = 30 * 60; // 30 minuten
+const GELDIGE_TALEN = ['nl', 'en', 'fr'];
 
 function normaliseerTaal(taal) {
-  return String(taal || '').trim().toLowerCase() === 'en' ? 'en' : 'nl';
+  const genormaliseerd = String(taal || '').trim().toLowerCase();
+  return GELDIGE_TALEN.indexOf(genormaliseerd) !== -1 ? genormaliseerd : 'nl';
 }
 let chauffeursCacheGeheugen = null;
 // Kort genoeg dat een net gedeactiveerde chauffeur niet te lang "actief" kan
@@ -362,8 +364,54 @@ function matchtTrefwoord(trefwoord, invoerZin, invoerWoorden) {
   return invoerWoorden.some(function(w) {
     if (w === trefwoord) return true;
     if (trefwoord.length >= 4 && w.indexOf(trefwoord) === 0) return true;
+    if (trefwoord.length >= 4 && lijktOpTypefout(w, trefwoord)) return true;
     return false;
   });
+}
+
+// Hoeveel tikfouten (letter verwisseld/vergeten/te veel) staan we toe voordat
+// twee woorden niet meer als "hetzelfde bedoeld" tellen - hangt af van de
+// woordlengte, zodat korte woorden niet per ongeluk met van-alles matchen.
+// Zelfde patroon als in Code.gs, hier apart nodig omdat Cloudflare en Apps
+// Script los van elkaar draaien.
+function maxToegestaneTypefouten(lengte) {
+  if (lengte >= 8) return 2;
+  if (lengte >= 4) return 1;
+  return 0;
+}
+
+// Voor chauffeurs met dyslexie (of gewoon een tikfoutje): "keoling" i.p.v.
+// "koeling", "bezogen" i.p.v. "bezorgen", etc. Damerau-Levenshtein telt een
+// verwisseling van twee buurletters als 1 fout in plaats van 2 - juist dat
+// type fout komt veel voor bij dyslexie.
+function lijktOpTypefout(a, b) {
+  const maxAfstand = maxToegestaneTypefouten(Math.max(a.length, b.length));
+  if (maxAfstand === 0) return false;
+  if (Math.abs(a.length - b.length) > maxAfstand) return false;
+  return damerauLevenshteinAfstand(a, b) <= maxAfstand;
+}
+
+function damerauLevenshteinAfstand(a, b) {
+  const al = a.length, bl = b.length;
+  const d = [];
+  for (let i = 0; i <= al; i++) d[i] = [i];
+  for (let j = 0; j <= bl; j++) d[0][j] = j;
+
+  for (let i = 1; i <= al; i++) {
+    for (let j = 1; j <= bl; j++) {
+      const kosten = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        d[i][j - 1] + 1,
+        d[i - 1][j - 1] + kosten
+      );
+      if (i > 1 && j > 1 && a.charAt(i - 1) === b.charAt(j - 2) && a.charAt(i - 2) === b.charAt(j - 1)) {
+        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+      }
+    }
+  }
+
+  return d[al][bl];
 }
 
 function normaliseerWoorden(tekst) {
@@ -445,10 +493,33 @@ const EN_STOPWOORDEN = [
   'could', 'will', 'would', 'shall', 'do', 'does', 'did', 'about'
 ];
 
+const FR_STOPWOORDEN = [
+  'le', 'la', 'les', 'un', 'une', 'des', 'et', 'ou', 'mais', 'donc', 'si',
+  'alors', 'que', 'qui', 'quoi', 'où', 'quand', 'pourquoi', 'comment',
+  'quel', 'quelle', 'quels', 'quelles', 'je', 'tu', 'il', 'elle', 'nous',
+  'vous', 'ils', 'elles', 'me', 'te', 'se', 'lui', 'leur', 'mon', 'ma',
+  'mes', 'ton', 'ta', 'tes', 'notre', 'votre', 'leurs', 'ne', 'pas', 'plus',
+  'aussi', 'encore', 'déjà', 'de', 'du', 'pour', 'avec', 'sur', 'dans',
+  'à', 'au', 'aux', 'par', 'sans', 'sous', 'entre', 'vers', 'chez',
+  'pendant', 'après', 'avant', 'est', 'suis', 'es', 'sommes', 'êtes',
+  'sont', 'était', 'étaient', 'être', 'été', 'ai', 'as', 'a', 'avons',
+  'avez', 'ont', 'avait', 'avaient', 'avoir', 'dois', 'doit', 'devons',
+  'devez', 'doivent', 'peux', 'peut', 'pouvons', 'pouvez', 'peuvent',
+  'veux', 'veut', 'voulons', 'voulez', 'veulent', 'vais', 'va', 'allons',
+  'allez', 'vont', 'ce', 'cette', 'ces', 'cet'
+];
+
+function haalStopwoorden(taal) {
+  const t = normaliseerTaal(taal);
+  if (t === 'en') return EN_STOPWOORDEN;
+  if (t === 'fr') return FR_STOPWOORDEN;
+  return NL_STOPWOORDEN;
+}
+
 function zoekSuggestiesInCache(vragenLijst, vraagTekst, taal) {
   if (!vragenLijst || !vraagTekst) return [];
 
-  const stopwoorden = normaliseerTaal(taal) === 'en' ? EN_STOPWOORDEN : NL_STOPWOORDEN;
+  const stopwoorden = haalStopwoorden(taal);
   const invoerWoorden = normaliseerWoorden(vraagTekst);
   const betekenisvolleInvoerWoorden = invoerWoorden.filter(w => stopwoorden.indexOf(w) === -1);
 
@@ -458,7 +529,12 @@ function zoekSuggestiesInCache(vragenLijst, vraagTekst, taal) {
     if (!item.vraag) return;
 
     const overlap = normaliseerWoorden(item.vraag).filter(function(woord) {
-      return stopwoorden.indexOf(woord) === -1 && betekenisvolleInvoerWoorden.indexOf(woord) !== -1;
+      if (stopwoorden.indexOf(woord) !== -1) return false;
+      // Exacte match, of (bij voldoende lange woorden) ook een match die op
+      // een tikfoutje lijkt - zelfde reden als bij matchtTrefwoord.
+      return betekenisvolleInvoerWoorden.some(function(invoerWoord) {
+        return invoerWoord === woord || (woord.length >= 4 && lijktOpTypefout(invoerWoord, woord));
+      });
     }).length;
 
     if (overlap > 0) {

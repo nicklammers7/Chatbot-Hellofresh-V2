@@ -1110,6 +1110,13 @@
             <rect y="8" width="30" height="4" fill="#CF142B"/>
           </svg>
         </button>
+        <button class="taal-knop" data-taal="fr" aria-label="Français">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#FFFFFF"/>
+            <rect width="10" height="20" fill="#0055A4"/>
+            <rect x="20" width="10" height="20" fill="#EF4135"/>
+          </svg>
+        </button>
       </div>
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
@@ -1161,6 +1168,13 @@
             <rect y="7" width="30" height="6" fill="#FFFFFF"/>
             <rect x="13" width="4" height="20" fill="#CF142B"/>
             <rect y="8" width="30" height="4" fill="#CF142B"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="fr" aria-label="Français">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#FFFFFF"/>
+            <rect width="10" height="20" fill="#0055A4"/>
+            <rect x="20" width="10" height="20" fill="#EF4135"/>
           </svg>
         </button>
       </div>
@@ -1767,12 +1781,187 @@
         CHAT_VERSTUUR: 'Send',
         TAAL_SUGGESTIE: 'This question looks like it\'s in English. Would you like to switch to English?',
         TAAL_SUGGESTIE_KNOP: 'Switch to English'
+      },
+      fr: {
+        LOGIN_PLACEHOLDER_EMAIL: 'Entrez votre adresse e-mail MobileNXT',
+        LOGIN_ONTHOUDEN: 'Se souvenir de cet appareil',
+        LOGIN_BTN: 'Se connecter',
+        LOGIN_BTN_BEZIG: 'Connexion en cours...',
+        LOGIN_HINT: 'Pour toute question, appelez le HUB.',
+        LOGIN_INACTIEF: 'Cette adresse e-mail n\'est pas encore active. Veuillez contacter le HUB.',
+        LOGIN_ONGELDIG: 'Adresse e-mail invalide, veuillez réessayer.',
+        ONJUISTE_CODE: 'Code incorrect.',
+        LOGIN_FOOTER: 'Tous droits réservés.<br>Développé par Nick Lammers',
+        VERIFICATIE_TITEL: 'Code de vérification',
+        VERIFICATIE_HINT: 'Nous avons envoyé un code à votre adresse e-mail. Saisissez-le ci-dessous.',
+        VERIFICATIE_PLACEHOLDER_CODE: '•••••',
+        VERIFICATIE_BTN: 'Confirmer',
+        VERIFICATIE_BTN_BEZIG: 'Vérification en cours...',
+        VERIFICATIE_OPNIEUW: 'Vous n\'avez pas reçu de code ? Renvoyer',
+        VERIFICATIE_KON_NIET_VERSTUREN: 'Impossible d\'envoyer un code de vérification.',
+        VERIFICATIE_FOUT_VERSTUREN: 'Une erreur s\'est produite lors de l\'envoi du code, veuillez réessayer.',
+        SESSIE_VERLOPEN: 'Votre session a expiré, veuillez vous reconnecter.',
+        ER_GING_IETS_MIS: 'Une erreur s\'est produite, veuillez réessayer.',
+        TRAAG_VERBINDING: 'La connexion était un peu lente, veuillez réessayer.',
+        ARIA_MENU: 'Menu',
+        ARIA_THEMA: 'Basculer entre le thème clair et sombre',
+        ARIA_SLUITEN: 'Fermer',
+        ARIA_BEL_HUB: 'Appeler un HUB',
+        HEADER_TITEL: 'HelloFresh Chatbot',
+        MENU_FAQ: 'FAQ',
+        MENU_ROUTE: 'Feuille de route numérique',
+        MENU_FEEDBACK: 'Feedback',
+        MENU_VOORWAARDEN: 'Conditions générales',
+        MENU_UITLOGGEN: 'Se déconnecter',
+        UITLOGGEN_VRAAG: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+        UITLOGGEN_NIET_MEER_VRAGEN: 'Ne plus demander',
+        UITLOGGEN_TERUG: 'Retour au chatbot',
+        UITLOGGEN_BEVESTIG: 'Se déconnecter',
+        DISCLAIMER_TITEL: 'Conditions générales',
+        DISCLAIMER_TEKST_VOOR: 'Avant de continuer, nous vous demandons d\'accepter nos',
+        DISCLAIMER_LINK: 'conditions générales',
+        DISCLAIMER_AKKOORD: 'J\'accepte les conditions générales',
+        DISCLAIMER_ONTHOUDEN: 'Ne plus me le rappeler pendant les 30 prochains jours',
+        DISCLAIMER_DOORGAAN: 'Continuer',
+        VOORWAARDEN_TITEL: 'Conditions générales',
+        VOORWAARDEN_SLUITEN: 'Fermer',
+        VOORWAARDEN_HTML: `
+          <p><strong>Conditions de confidentialité HelloFresh Chatbot</strong></p>
+
+          <p><strong>1. Traitement des données personnelles</strong><br>
+          Lorsque vous utilisez le HelloFresh Chatbot, nous pouvons enregistrer les données suivantes :</p>
+          <ul>
+            <li>votre adresse e-mail professionnelle ;</li>
+            <li>la question que vous posez au chatbot ;</li>
+            <li>la date et l'heure à laquelle vous posez la question ;</li>
+            <li>la réponse donnée par le chatbot ;</li>
+            <li>si le chatbot a trouvé une réponse appropriée.</li>
+          </ul>
+
+          <p><strong>2. Finalité du traitement</strong><br>
+          Nous utilisons ces données uniquement pour :</p>
+          <ul>
+            <li>contrôler la qualité et la fiabilité du chatbot ;</li>
+            <li>identifier les réponses manquantes ou incorrectes ;</li>
+            <li>ajouter de nouvelles questions et réponses à la base de connaissances ;</li>
+            <li>enquêter sur les problèmes techniques et les erreurs ;</li>
+            <li>vous contacter au sujet d'une question posée, si nécessaire.</li>
+          </ul>
+          <p>Les données ne sont pas utilisées pour la prise de décision automatisée, le profilage, les évaluations de performance ou les mesures disciplinaires.</p>
+
+          <p><strong>3. Ne mentionnez pas de données sensibles</strong><br>
+          Ne mentionnez pas dans votre question des données qui ne sont pas nécessaires, telles que :</p>
+          <ul>
+            <li>des données médicales ou de santé ;</li>
+            <li>des noms, adresses ou numéros de téléphone de clients ;</li>
+            <li>des données personnelles de collègues ou d'autres personnes ;</li>
+            <li>des mots de passe, codes d'accès ou autres informations confidentielles.</li>
+          </ul>
+          <p>Si de telles données sont malgré tout saisies, elles peuvent temporairement se retrouver dans le journal du chatbot. Nous supprimons ces données dès que nous les identifions et qu'elles ne sont pas nécessaires à la finalité du traitement.</p>
+
+          <p><strong>4. Durée de conservation</strong><br>
+          L'adresse e-mail, la question, la date et la réponse du chatbot sont conservées pendant 90 jours maximum. Les données peuvent être supprimées plus tôt lorsque :</p>
+          <ul>
+            <li>la question a été examinée et n'est plus nécessaire ;</li>
+            <li>la réponse a été ajoutée à la base de connaissances ;</li>
+            <li>les données s'avèrent non pertinentes ;</li>
+            <li>la question contient des données personnelles inutiles ou sensibles.</li>
+          </ul>
+          <p>Après 90 jours maximum, les données personnelles sont supprimées. Nous ne pouvons ensuite conserver que des statistiques anonymes, par exemple la fréquence à laquelle un certain sujet a été consulté. Ces statistiques ne sont plus liées à un utilisateur individuel.</p>
+
+          <p><strong>5. Accès et sécurité</strong><br>
+          Seuls les employés responsables de la gestion, de la sécurisation et de l'amélioration du chatbot ont accès aux données enregistrées. Nous prenons des mesures techniques et organisationnelles appropriées pour protéger les données contre l'accès non autorisé, la perte, la modification ou la divulgation.</p>
+
+          <p><strong>6. Partage des données</strong><br>
+          Les données ne sont pas vendues ni partagées avec des tiers, sauf lorsque :</p>
+          <ul>
+            <li>cela est nécessaire au fonctionnement technique du chatbot ;</li>
+            <li>un fournisseur traite des données en notre nom ;</li>
+            <li>nous sommes légalement obligés de fournir des données.</li>
+          </ul>
+          <p>Lorsqu'un fournisseur externe traite des données en notre nom, des accords appropriés sont conclus à ce sujet.</p>
+
+          <p><strong>7. Base légale</strong><br>
+          Le traitement a lieu parce que l'organisation a un intérêt légitime à améliorer, sécuriser et gérer le chatbot interne et à fournir des informations opérationnelles fiables. Ce faisant, nous limitons le traitement aux données raisonnablement nécessaires à ces fins.</p>
+
+          <p><strong>8. Vos droits en matière de confidentialité</strong><br>
+          Dans la mesure permise par le RGPD, vous pouvez demander :</p>
+          <ul>
+            <li>l'accès à vos données enregistrées ;</li>
+            <li>la correction de données inexactes ;</li>
+            <li>la suppression de vos données ;</li>
+            <li>la limitation du traitement ;</li>
+            <li>l'opposition au traitement.</li>
+          </ul>
+          <p>Une demande peut être soumise via : <span class="voorwaarden-placeholder">[adresse e-mail de confidentialité]</span></p>
+          <p>Nous pouvons demander des informations supplémentaires pour vérifier votre identité avant de traiter une demande.</p>
+
+          <p><strong>9. Organisation responsable</strong><br>
+          Le responsable du traitement de ces données est :<br>
+          <span class="voorwaarden-placeholder">[nom légal complet de l'organisation]</span><br>
+          <span class="voorwaarden-placeholder">[adresse du siège]</span><br>
+          <span class="voorwaarden-placeholder">[adresse e-mail de confidentialité]</span></p>
+          <p>Pour toute question concernant ces conditions de confidentialité, vous pouvez nous contacter via l'adresse e-mail ci-dessus.</p>
+
+          <p><strong>10. Modifications</strong><br>
+          Ces conditions de confidentialité peuvent être mises à jour lorsque le fonctionnement du chatbot ou le traitement des données personnelles change. La version la plus récente est mise à disposition avec le chatbot.</p>
+          <p><em>Dernière mise à jour : 6 août 2026</em></p>
+        `,
+        FEEDBACK_TITEL: 'Votre avis',
+        FEEDBACK_PLACEHOLDER: 'Qu\'est-ce qui pourrait être amélioré ? Quelles questions manquent ?',
+        FEEDBACK_VERSTUREN: 'Envoyer',
+        FEEDBACK_BEDANKT: 'Merci pour votre avis, nous l\'examinerons attentivement !',
+        FEEDBACK_SLUITEN: 'Fermer',
+        FEEDBACK_KIES_STERREN: 'Veuillez d\'abord choisir un nombre d\'étoiles.',
+        FAQ_ZOEK_PLACEHOLDER: 'Rechercher une question...',
+        FAQ_LADEN: 'Chargement...',
+        FAQ_KON_NIET_LADEN: 'Impossible de charger les questions, veuillez réessayer.',
+        FAQ_GEEN_VRAGEN: 'Aucune question trouvée.',
+        FAQ_ALLE: 'Toutes',
+        ROUTE_TITEL: 'Feuille de route numérique',
+        ROUTE_PLACEHOLDER: 'Numéro d\'itinéraire complet, par ex. DUIAM-260712-6183',
+        ROUTE_ZOEKEN: 'Rechercher',
+        ROUTE_ARIA_VORIGE: 'Page précédente',
+        ROUTE_ARIA_VOLGENDE: 'Page suivante',
+        ROUTE_ARIA_VERGROTEN: 'Zoomer',
+        ROUTE_ONTGRENDEL_TEKST: 'Il s\'agit d\'un itinéraire d\'hier. Saisissez le code de déverrouillage ci-dessous.',
+        ROUTE_ONTGRENDEL_PLACEHOLDER: 'Code de déverrouillage',
+        ROUTE_ONTGRENDEL_ANNULEREN: 'Annuler',
+        ROUTE_ONTGRENDEL_BEVESTIGEN: 'Confirmer',
+        ROUTE_GEEN_ROUTE_VANDAAG: 'Aucun itinéraire trouvé pour aujourd\'hui.',
+        ROUTE_WORDT_GELADEN: 'Chargement de l\'itinéraire, cela peut prendre un moment...',
+        ROUTE_LEEG_INVOER: 'Saisissez le numéro d\'itinéraire complet, par ex. DUIAM-260712-6183.',
+        ROUTE_BEZIG_ZOEKEN: 'Recherche en cours...',
+        ROUTE_DUURT_TE_LANG: 'Cela prend trop de temps. Réessayez, ou contactez le HUB si cela persiste.',
+        ROUTE_NA_AFSLUITTIJD: 'La feuille de route n\'est plus disponible après 23h30, comme la version papier après votre service.',
+        ROUTE_FOUT_PREFIX: 'Erreur : ',
+        ROUTE_MEERDERE: 'Plusieurs itinéraires trouvés, veuillez contacter le HUB.',
+        ROUTE_GEEN_ROUTE_SUGGESTIES: 'Aucun itinéraire trouvé. Vouliez-vous dire l\'un de ceux-ci ?',
+        ROUTE_RITLIJST_LADEN: 'Chargement de la feuille de route...',
+        ROUTE_KON_NIET_OPENEN: 'Impossible d\'ouvrir la feuille de route.',
+        ROUTE_DOWNLOAD: 'Télécharger la feuille de route',
+        ROUTE_PAGINA: 'Page {n} sur {totaal}',
+        CHAT_WELKOM: 'Bonjour ! Posez votre question et j\'essaierai de vous répondre immédiatement, ou cliquez sur les 3 lignes en haut à gauche pour les questions les plus fréquentes.',
+        CHAT_VOORGESTELDE_CATEGORIEEN: 'Catégories suggérées :',
+        CHAT_GEEN_VRAGEN_IN_CATEGORIE: 'Je n\'ai pas encore de questions sous « {categorie} ». N\'hésitez pas à poser votre propre question.',
+        CHAT_VRAGEN_OVER: 'Questions sur {categorie} :',
+        CHAT_GEEN_ANTWOORD: 'Je n\'ai pas de réponse à cela, veuillez contacter le HUB.',
+        CHAT_BEDOEL_JE: 'Je n\'ai pas trouvé de réponse exacte à cela. Vouliez-vous peut-être dire une de ces questions ?',
+        CHAT_VRAAG_GEANNULEERD: 'Question annulée.',
+        CHAT_ANNULEER_ARIA: 'Annuler la question',
+        CHAT_INPUT_PLACEHOLDER: 'Tapez votre question...',
+        CHAT_VERSTUUR: 'Envoyer',
+        TAAL_SUGGESTIE: 'Cette question semble être en français. Voulez-vous passer au français ?',
+        TAAL_SUGGESTIE_KNOP: 'Passer au français'
       }
     };
 
+    const GELDIGE_TALEN = ['nl', 'en', 'fr'];
+
     const STARTCATEGORIEEN_PER_TAAL = {
       nl: ['Koeling', 'Levering', 'Algemeen'],
-      en: ['Cooling', 'Delivery', 'General']
+      en: ['Cooling', 'Delivery', 'General'],
+      fr: ['Refroidissement', 'Livraison', 'Général']
     };
 
     let huidigeTaal = 'nl';
@@ -1795,7 +1984,7 @@
     function haalVoorkeurTaal() {
       try {
         const opgeslagen = localStorage.getItem(TAAL_KEY);
-        if (opgeslagen === 'nl' || opgeslagen === 'en') return opgeslagen;
+        if (GELDIGE_TALEN.indexOf(opgeslagen) !== -1) return opgeslagen;
       } catch (e) {}
       return 'nl';
     }
@@ -1892,7 +2081,7 @@
     }
 
     function wisselTaal(nieuweTaal) {
-      if (nieuweTaal !== 'nl' && nieuweTaal !== 'en') return;
+      if (GELDIGE_TALEN.indexOf(nieuweTaal) === -1) return;
       huidigeTaal = nieuweTaal;
       try { localStorage.setItem(TAAL_KEY, huidigeTaal); } catch (e) {}
       pasTaalToe();
@@ -2542,20 +2731,35 @@
       'am', 'and', 'or', 'with', 'for', 'to', 'at', 'this', 'that',
       'these', 'those', 'my', 'your', 'when', 'which', 'do', 'does'
     ];
+    const FR_HERKENNINGSWOORDEN = [
+      'le', 'la', 'les', 'un', 'une', 'des', 'je', 'tu', 'il', 'elle',
+      'nous', 'vous', 'ils', 'elles', 'quoi', 'comment', 'où', 'pourquoi',
+      'quand', 'quel', 'quelle', 'ne', 'pas', 'mais', 'peux', 'peut',
+      'dois', 'doit', 'veux', 'veut', 'suis', 'es', 'est', 'sont', 'et',
+      'ou', 'avec', 'pour', 'à', 'ce', 'cette', 'mon', 'ma', 'ton', 'ta'
+    ];
 
+    // Score elke taal apart en kies alleen een taal als die duidelijk (dus
+    // strikt) hoger scoort dan de andere twee - bij een gelijke stand of te
+    // weinig signaal (< 2 woorden) wordt niets voorgesteld.
     function gokTaalVanTekst(tekst) {
       const woorden = String(tekst || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/).filter(Boolean);
       if (woorden.length < 2) return null;
 
-      let nlScore = 0;
-      let enScore = 0;
+      const scores = { nl: 0, en: 0, fr: 0 };
       woorden.forEach(function(w) {
-        if (NL_HERKENNINGSWOORDEN.indexOf(w) !== -1) nlScore++;
-        if (EN_HERKENNINGSWOORDEN.indexOf(w) !== -1) enScore++;
+        if (NL_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.nl++;
+        if (EN_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.en++;
+        if (FR_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.fr++;
       });
 
-      if (nlScore === enScore) return null;
-      return nlScore > enScore ? 'nl' : 'en';
+      const talen = ['nl', 'en', 'fr'];
+      talen.sort(function(a, b) { return scores[b] - scores[a]; });
+      const beste = talen[0];
+      const tweedeBeste = talen[1];
+
+      if (scores[beste] === 0 || scores[beste] === scores[tweedeBeste]) return null;
+      return beste;
     }
 
     // Bewust in de vóórgestelde (dus vermoedelijke) taal van de vraag zelf
