@@ -26,6 +26,12 @@
       --danger: #C62828;
       --focus-ring: rgba(20, 83, 45, 0.16);
       --chat-pattern: none;
+      /* Vast, thema-onafhankelijk groen voor het loginscherm en de
+         header-balk - deze twee horen er in licht én donker thema
+         precies hetzelfde uit te zien (in plaats van mee te veranderen
+         met --pine/--pine-deep), zodat het merkgevoel consistent blijft. */
+      --brand-green: #2F6B45;
+      --brand-green-deep: #1E4A30;
       --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
@@ -106,7 +112,7 @@
     }
     header {
       position: relative;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
       color: var(--bubble-user-text);
       padding: 18px 16px 14px;
       font-family: var(--font-display);
@@ -210,28 +216,32 @@
     }
     .taal-wissel {
       display: flex;
-      gap: 4px;
+      gap: 6px;
       align-items: center;
     }
     .taal-knop {
       width: 30px;
-      height: 30px;
+      height: 20px;
       flex: 0 0 auto;
+      padding: 0;
       background: transparent;
       border: none;
-      border-radius: 50%;
-      font-size: 17px;
-      line-height: 1;
+      border-radius: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.45;
-      filter: grayscale(70%);
+      overflow: hidden;
+      opacity: 0.6;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
+    }
+    .taal-knop svg {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
     .taal-knop.actief {
       opacity: 1;
-      filter: none;
-      box-shadow: 0 0 0 2px var(--brass) inset;
+      box-shadow: 0 0 0 2px var(--brass);
     }
     #themaKnop {
       position: absolute;
@@ -247,9 +257,9 @@
     #loginOverlay {
       position: fixed;
       inset: 0;
-      background-color: var(--pine);
+      background-color: var(--brand-green);
       background-image:
-        radial-gradient(circle at 28% 18%, var(--pine) 0%, var(--pine-deep) 72%),
+        radial-gradient(circle at 28% 18%, var(--brand-green) 0%, var(--brand-green-deep) 72%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cg id='ll' fill='none' stroke='%233F6B4D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M -9,0 A 9,9 0 0 1 9,0 L -9,0 Z'/%3E%3Cline x1='0' y1='0' x2='7.79' y2='-4.5'/%3E%3Cline x1='0' y1='0' x2='4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='0' y2='-9'/%3E%3Cline x1='0' y1='0' x2='-4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='-7.79' y2='-4.5'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23ll' transform='translate(20,25) rotate(-15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(70,15) rotate(20) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(130,30) rotate(-30) scale(1.3)'/%3E%3Cuse href='%23ll' transform='translate(180,70) rotate(10) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(40,80) rotate(40) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(100,90) rotate(-10) scale(0.7)'/%3E%3Cuse href='%23ll' transform='translate(160,120) rotate(25) scale(1.2)'/%3E%3Cuse href='%23ll' transform='translate(15,140) rotate(-25) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(75,150) rotate(15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(140,170) rotate(-5) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(190,180) rotate(35) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(50,190) rotate(-20) scale(0.85)'/%3E%3C/g%3E%3C/defs%3E%3C/svg%3E");
       background-repeat: no-repeat, repeat;
       z-index: 40;
@@ -445,7 +455,7 @@
       justify-content: center;
       gap: 10px;
       padding: 14px;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
     }
     .faq-header::after {
       content: "";
@@ -544,7 +554,7 @@
     }
     .route-header {
       position: relative;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
       color: var(--bubble-user-text);
       padding: 18px 16px 14px;
       font-family: var(--font-display);
@@ -1082,8 +1092,31 @@
   <div id="app">
     <div id="loginOverlay">
       <div class="taal-wissel" id="taalWisselLogin" style="position:absolute; top:16px; left:16px;">
-        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
-        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#21468B"/>
+            <rect width="30" height="13.333" fill="#FFFFFF"/>
+            <rect width="30" height="6.667" fill="#AE1C28"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="en" aria-label="English">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#00247D"/>
+            <g stroke="#FFFFFF" stroke-width="4"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <g stroke="#CF142B" stroke-width="1.6"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <rect x="12" width="6" height="20" fill="#FFFFFF"/>
+            <rect y="7" width="30" height="6" fill="#FFFFFF"/>
+            <rect x="13" width="4" height="20" fill="#CF142B"/>
+            <rect y="8" width="30" height="4" fill="#CF142B"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="fr" aria-label="Français">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#FFFFFF"/>
+            <rect width="10" height="20" fill="#0055A4"/>
+            <rect x="20" width="10" height="20" fill="#EF4135"/>
+          </svg>
+        </button>
       </div>
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
@@ -1119,15 +1152,41 @@
       </button>
       HelloFresh Chatbot
       <div class="taal-wissel" id="taalWisselHeader" style="position:absolute; top:50%; right:58px; transform:translateY(-50%);">
-        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
-        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#21468B"/>
+            <rect width="30" height="13.333" fill="#FFFFFF"/>
+            <rect width="30" height="6.667" fill="#AE1C28"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="en" aria-label="English">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#00247D"/>
+            <g stroke="#FFFFFF" stroke-width="4"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <g stroke="#CF142B" stroke-width="1.6"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <rect x="12" width="6" height="20" fill="#FFFFFF"/>
+            <rect y="7" width="30" height="6" fill="#FFFFFF"/>
+            <rect x="13" width="4" height="20" fill="#CF142B"/>
+            <rect y="8" width="30" height="4" fill="#CF142B"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="fr" aria-label="Français">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#FFFFFF"/>
+            <rect width="10" height="20" fill="#0055A4"/>
+            <rect x="20" width="10" height="20" fill="#EF4135"/>
+          </svg>
+        </button>
       </div>
       <button id="themaKnop" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
     </header>
     <div id="menuAchtergrond" class="verborgen"></div>
     <div id="menuDropdown" class="verborgen">
       <button id="faqMenuItem" class="menu-item">FAQ</button>
-      <button id="routeMenuItem" class="menu-item">Routelijst digitaal</button>
+      <!-- Tijdelijk verborgen op verzoek: nog onduidelijk of deze functie
+           gebruikt gaat worden. Code/overlay blijven bestaan - gewoon de
+           "verborgen"-class weer verwijderen om 'm terug te zetten. -->
+      <button id="routeMenuItem" class="menu-item verborgen">Routelijst digitaal</button>
       <button id="feedbackMenuItem" class="menu-item">Feedback</button>
       <button id="voorwaardenMenuItem" class="menu-item">Algemene voorwaarden</button>
       <button id="uitloggenMenuItem" class="menu-item">Uitloggen</button>
@@ -1550,7 +1609,9 @@
         CHAT_VRAAG_GEANNULEERD: 'Vraag geannuleerd.',
         CHAT_ANNULEER_ARIA: 'Vraag annuleren',
         CHAT_INPUT_PLACEHOLDER: 'Typ je vraag...',
-        CHAT_VERSTUUR: 'Verstuur'
+        CHAT_VERSTUUR: 'Verstuur',
+        TAAL_SUGGESTIE: 'Deze vraag lijkt in het Nederlands te zijn. Wil je overschakelen naar Nederlands?',
+        TAAL_SUGGESTIE_KNOP: 'Overschakelen naar Nederlands'
       },
       en: {
         LOGIN_PLACEHOLDER_EMAIL: 'Enter your MobileNXT email address',
@@ -1720,19 +1781,196 @@
         CHAT_VRAAG_GEANNULEERD: 'Question cancelled.',
         CHAT_ANNULEER_ARIA: 'Cancel question',
         CHAT_INPUT_PLACEHOLDER: 'Type your question...',
-        CHAT_VERSTUUR: 'Send'
+        CHAT_VERSTUUR: 'Send',
+        TAAL_SUGGESTIE: 'This question looks like it\'s in English. Would you like to switch to English?',
+        TAAL_SUGGESTIE_KNOP: 'Switch to English'
+      },
+      fr: {
+        LOGIN_PLACEHOLDER_EMAIL: 'Entrez votre adresse e-mail MobileNXT',
+        LOGIN_ONTHOUDEN: 'Se souvenir de cet appareil',
+        LOGIN_BTN: 'Se connecter',
+        LOGIN_BTN_BEZIG: 'Connexion en cours...',
+        LOGIN_HINT: 'Pour toute question, appelez le HUB.',
+        LOGIN_INACTIEF: 'Cette adresse e-mail n\'est pas encore active. Veuillez contacter le HUB.',
+        LOGIN_ONGELDIG: 'Adresse e-mail invalide, veuillez réessayer.',
+        ONJUISTE_CODE: 'Code incorrect.',
+        LOGIN_FOOTER: 'Tous droits réservés.<br>Développé par Nick Lammers',
+        VERIFICATIE_TITEL: 'Code de vérification',
+        VERIFICATIE_HINT: 'Nous avons envoyé un code à votre adresse e-mail. Saisissez-le ci-dessous.',
+        VERIFICATIE_PLACEHOLDER_CODE: '•••••',
+        VERIFICATIE_BTN: 'Confirmer',
+        VERIFICATIE_BTN_BEZIG: 'Vérification en cours...',
+        VERIFICATIE_OPNIEUW: 'Vous n\'avez pas reçu de code ? Renvoyer',
+        VERIFICATIE_KON_NIET_VERSTUREN: 'Impossible d\'envoyer un code de vérification.',
+        VERIFICATIE_FOUT_VERSTUREN: 'Une erreur s\'est produite lors de l\'envoi du code, veuillez réessayer.',
+        SESSIE_VERLOPEN: 'Votre session a expiré, veuillez vous reconnecter.',
+        ER_GING_IETS_MIS: 'Une erreur s\'est produite, veuillez réessayer.',
+        TRAAG_VERBINDING: 'La connexion était un peu lente, veuillez réessayer.',
+        ARIA_MENU: 'Menu',
+        ARIA_THEMA: 'Basculer entre le thème clair et sombre',
+        ARIA_SLUITEN: 'Fermer',
+        ARIA_BEL_HUB: 'Appeler un HUB',
+        HEADER_TITEL: 'HelloFresh Chatbot',
+        MENU_FAQ: 'FAQ',
+        MENU_ROUTE: 'Feuille de route numérique',
+        MENU_FEEDBACK: 'Feedback',
+        MENU_VOORWAARDEN: 'Conditions générales',
+        MENU_UITLOGGEN: 'Se déconnecter',
+        UITLOGGEN_VRAAG: 'Êtes-vous sûr de vouloir vous déconnecter ?',
+        UITLOGGEN_NIET_MEER_VRAGEN: 'Ne plus demander',
+        UITLOGGEN_TERUG: 'Retour au chatbot',
+        UITLOGGEN_BEVESTIG: 'Se déconnecter',
+        DISCLAIMER_TITEL: 'Conditions générales',
+        DISCLAIMER_TEKST_VOOR: 'Avant de continuer, nous vous demandons d\'accepter nos',
+        DISCLAIMER_LINK: 'conditions générales',
+        DISCLAIMER_AKKOORD: 'J\'accepte les conditions générales',
+        DISCLAIMER_ONTHOUDEN: 'Ne plus me le rappeler pendant les 30 prochains jours',
+        DISCLAIMER_DOORGAAN: 'Continuer',
+        VOORWAARDEN_TITEL: 'Conditions générales',
+        VOORWAARDEN_SLUITEN: 'Fermer',
+        VOORWAARDEN_HTML: `
+          <p><strong>Conditions de confidentialité HelloFresh Chatbot</strong></p>
+
+          <p><strong>1. Traitement des données personnelles</strong><br>
+          Lorsque vous utilisez le HelloFresh Chatbot, nous pouvons enregistrer les données suivantes :</p>
+          <ul>
+            <li>votre adresse e-mail professionnelle ;</li>
+            <li>la question que vous posez au chatbot ;</li>
+            <li>la date et l'heure à laquelle vous posez la question ;</li>
+            <li>la réponse donnée par le chatbot ;</li>
+            <li>si le chatbot a trouvé une réponse appropriée.</li>
+          </ul>
+
+          <p><strong>2. Finalité du traitement</strong><br>
+          Nous utilisons ces données uniquement pour :</p>
+          <ul>
+            <li>contrôler la qualité et la fiabilité du chatbot ;</li>
+            <li>identifier les réponses manquantes ou incorrectes ;</li>
+            <li>ajouter de nouvelles questions et réponses à la base de connaissances ;</li>
+            <li>enquêter sur les problèmes techniques et les erreurs ;</li>
+            <li>vous contacter au sujet d'une question posée, si nécessaire.</li>
+          </ul>
+          <p>Les données ne sont pas utilisées pour la prise de décision automatisée, le profilage, les évaluations de performance ou les mesures disciplinaires.</p>
+
+          <p><strong>3. Ne mentionnez pas de données sensibles</strong><br>
+          Ne mentionnez pas dans votre question des données qui ne sont pas nécessaires, telles que :</p>
+          <ul>
+            <li>des données médicales ou de santé ;</li>
+            <li>des noms, adresses ou numéros de téléphone de clients ;</li>
+            <li>des données personnelles de collègues ou d'autres personnes ;</li>
+            <li>des mots de passe, codes d'accès ou autres informations confidentielles.</li>
+          </ul>
+          <p>Si de telles données sont malgré tout saisies, elles peuvent temporairement se retrouver dans le journal du chatbot. Nous supprimons ces données dès que nous les identifions et qu'elles ne sont pas nécessaires à la finalité du traitement.</p>
+
+          <p><strong>4. Durée de conservation</strong><br>
+          L'adresse e-mail, la question, la date et la réponse du chatbot sont conservées pendant 90 jours maximum. Les données peuvent être supprimées plus tôt lorsque :</p>
+          <ul>
+            <li>la question a été examinée et n'est plus nécessaire ;</li>
+            <li>la réponse a été ajoutée à la base de connaissances ;</li>
+            <li>les données s'avèrent non pertinentes ;</li>
+            <li>la question contient des données personnelles inutiles ou sensibles.</li>
+          </ul>
+          <p>Après 90 jours maximum, les données personnelles sont supprimées. Nous ne pouvons ensuite conserver que des statistiques anonymes, par exemple la fréquence à laquelle un certain sujet a été consulté. Ces statistiques ne sont plus liées à un utilisateur individuel.</p>
+
+          <p><strong>5. Accès et sécurité</strong><br>
+          Seuls les employés responsables de la gestion, de la sécurisation et de l'amélioration du chatbot ont accès aux données enregistrées. Nous prenons des mesures techniques et organisationnelles appropriées pour protéger les données contre l'accès non autorisé, la perte, la modification ou la divulgation.</p>
+
+          <p><strong>6. Partage des données</strong><br>
+          Les données ne sont pas vendues ni partagées avec des tiers, sauf lorsque :</p>
+          <ul>
+            <li>cela est nécessaire au fonctionnement technique du chatbot ;</li>
+            <li>un fournisseur traite des données en notre nom ;</li>
+            <li>nous sommes légalement obligés de fournir des données.</li>
+          </ul>
+          <p>Lorsqu'un fournisseur externe traite des données en notre nom, des accords appropriés sont conclus à ce sujet.</p>
+
+          <p><strong>7. Base légale</strong><br>
+          Le traitement a lieu parce que l'organisation a un intérêt légitime à améliorer, sécuriser et gérer le chatbot interne et à fournir des informations opérationnelles fiables. Ce faisant, nous limitons le traitement aux données raisonnablement nécessaires à ces fins.</p>
+
+          <p><strong>8. Vos droits en matière de confidentialité</strong><br>
+          Dans la mesure permise par le RGPD, vous pouvez demander :</p>
+          <ul>
+            <li>l'accès à vos données enregistrées ;</li>
+            <li>la correction de données inexactes ;</li>
+            <li>la suppression de vos données ;</li>
+            <li>la limitation du traitement ;</li>
+            <li>l'opposition au traitement.</li>
+          </ul>
+          <p>Une demande peut être soumise via : <span class="voorwaarden-placeholder">[adresse e-mail de confidentialité]</span></p>
+          <p>Nous pouvons demander des informations supplémentaires pour vérifier votre identité avant de traiter une demande.</p>
+
+          <p><strong>9. Organisation responsable</strong><br>
+          Le responsable du traitement de ces données est :<br>
+          <span class="voorwaarden-placeholder">[nom légal complet de l'organisation]</span><br>
+          <span class="voorwaarden-placeholder">[adresse du siège]</span><br>
+          <span class="voorwaarden-placeholder">[adresse e-mail de confidentialité]</span></p>
+          <p>Pour toute question concernant ces conditions de confidentialité, vous pouvez nous contacter via l'adresse e-mail ci-dessus.</p>
+
+          <p><strong>10. Modifications</strong><br>
+          Ces conditions de confidentialité peuvent être mises à jour lorsque le fonctionnement du chatbot ou le traitement des données personnelles change. La version la plus récente est mise à disposition avec le chatbot.</p>
+          <p><em>Dernière mise à jour : 6 août 2026</em></p>
+        `,
+        FEEDBACK_TITEL: 'Votre avis',
+        FEEDBACK_PLACEHOLDER: 'Qu\'est-ce qui pourrait être amélioré ? Quelles questions manquent ?',
+        FEEDBACK_VERSTUREN: 'Envoyer',
+        FEEDBACK_BEDANKT: 'Merci pour votre avis, nous l\'examinerons attentivement !',
+        FEEDBACK_SLUITEN: 'Fermer',
+        FEEDBACK_KIES_STERREN: 'Veuillez d\'abord choisir un nombre d\'étoiles.',
+        FAQ_ZOEK_PLACEHOLDER: 'Rechercher une question...',
+        FAQ_LADEN: 'Chargement...',
+        FAQ_KON_NIET_LADEN: 'Impossible de charger les questions, veuillez réessayer.',
+        FAQ_GEEN_VRAGEN: 'Aucune question trouvée.',
+        FAQ_ALLE: 'Toutes',
+        ROUTE_TITEL: 'Feuille de route numérique',
+        ROUTE_PLACEHOLDER: 'Numéro d\'itinéraire complet, par ex. DUIAM-260712-6183',
+        ROUTE_ZOEKEN: 'Rechercher',
+        ROUTE_ARIA_VORIGE: 'Page précédente',
+        ROUTE_ARIA_VOLGENDE: 'Page suivante',
+        ROUTE_ARIA_VERGROTEN: 'Zoomer',
+        ROUTE_ONTGRENDEL_TEKST: 'Il s\'agit d\'un itinéraire d\'hier. Saisissez le code de déverrouillage ci-dessous.',
+        ROUTE_ONTGRENDEL_PLACEHOLDER: 'Code de déverrouillage',
+        ROUTE_ONTGRENDEL_ANNULEREN: 'Annuler',
+        ROUTE_ONTGRENDEL_BEVESTIGEN: 'Confirmer',
+        ROUTE_GEEN_ROUTE_VANDAAG: 'Aucun itinéraire trouvé pour aujourd\'hui.',
+        ROUTE_WORDT_GELADEN: 'Chargement de l\'itinéraire, cela peut prendre un moment...',
+        ROUTE_LEEG_INVOER: 'Saisissez le numéro d\'itinéraire complet, par ex. DUIAM-260712-6183.',
+        ROUTE_BEZIG_ZOEKEN: 'Recherche en cours...',
+        ROUTE_DUURT_TE_LANG: 'Cela prend trop de temps. Réessayez, ou contactez le HUB si cela persiste.',
+        ROUTE_NA_AFSLUITTIJD: 'La feuille de route n\'est plus disponible après 23h30, comme la version papier après votre service.',
+        ROUTE_FOUT_PREFIX: 'Erreur : ',
+        ROUTE_MEERDERE: 'Plusieurs itinéraires trouvés, veuillez contacter le HUB.',
+        ROUTE_GEEN_ROUTE_SUGGESTIES: 'Aucun itinéraire trouvé. Vouliez-vous dire l\'un de ceux-ci ?',
+        ROUTE_RITLIJST_LADEN: 'Chargement de la feuille de route...',
+        ROUTE_KON_NIET_OPENEN: 'Impossible d\'ouvrir la feuille de route.',
+        ROUTE_DOWNLOAD: 'Télécharger la feuille de route',
+        ROUTE_PAGINA: 'Page {n} sur {totaal}',
+        CHAT_WELKOM: 'Bonjour ! Posez votre question et j\'essaierai de vous répondre immédiatement, ou cliquez sur les 3 lignes en haut à gauche pour les questions les plus fréquentes.',
+        CHAT_VOORGESTELDE_CATEGORIEEN: 'Catégories suggérées :',
+        CHAT_GEEN_VRAGEN_IN_CATEGORIE: 'Je n\'ai pas encore de questions sous « {categorie} ». N\'hésitez pas à poser votre propre question.',
+        CHAT_VRAGEN_OVER: 'Questions sur {categorie} :',
+        CHAT_GEEN_ANTWOORD: 'Je n\'ai pas de réponse à cela, veuillez contacter le HUB.',
+        CHAT_BEDOEL_JE: 'Je n\'ai pas trouvé de réponse exacte à cela. Vouliez-vous peut-être dire une de ces questions ?',
+        CHAT_VRAAG_GEANNULEERD: 'Question annulée.',
+        CHAT_ANNULEER_ARIA: 'Annuler la question',
+        CHAT_INPUT_PLACEHOLDER: 'Tapez votre question...',
+        CHAT_VERSTUUR: 'Envoyer',
+        TAAL_SUGGESTIE: 'Cette question semble être en français. Voulez-vous passer au français ?',
+        TAAL_SUGGESTIE_KNOP: 'Passer au français'
       }
     };
 
+    const GELDIGE_TALEN = ['nl', 'en', 'fr'];
+
     const STARTCATEGORIEEN_PER_TAAL = {
       nl: ['Koeling', 'Levering', 'Algemeen'],
-      en: ['Cooling', 'Delivery', 'General']
+      en: ['Cooling', 'Delivery', 'General'],
+      fr: ['Refroidissement', 'Livraison', 'Général']
     };
 
     let huidigeTaal = 'nl';
 
-    function t(sleutel, placeholders) {
-      const tabel = VERTALINGEN[huidigeTaal] || VERTALINGEN.nl;
+    function tIn(taal, sleutel, placeholders) {
+      const tabel = VERTALINGEN[taal] || VERTALINGEN.nl;
       let tekst = (sleutel in tabel) ? tabel[sleutel] : (VERTALINGEN.nl[sleutel] || sleutel);
       if (placeholders) {
         Object.keys(placeholders).forEach(function(naam) {
@@ -1742,10 +1980,14 @@
       return tekst;
     }
 
+    function t(sleutel, placeholders) {
+      return tIn(huidigeTaal, sleutel, placeholders);
+    }
+
     function haalVoorkeurTaal() {
       try {
         const opgeslagen = localStorage.getItem(TAAL_KEY);
-        if (opgeslagen === 'nl' || opgeslagen === 'en') return opgeslagen;
+        if (GELDIGE_TALEN.indexOf(opgeslagen) !== -1) return opgeslagen;
       } catch (e) {}
       return 'nl';
     }
@@ -1842,7 +2084,7 @@
     }
 
     function wisselTaal(nieuweTaal) {
-      if (nieuweTaal !== 'nl' && nieuweTaal !== 'en') return;
+      if (GELDIGE_TALEN.indexOf(nieuweTaal) === -1) return;
       huidigeTaal = nieuweTaal;
       try { localStorage.setItem(TAAL_KEY, huidigeTaal); } catch (e) {}
       pasTaalToe();
@@ -2475,6 +2717,100 @@
       berichtenEl.scrollTop = berichtenEl.scrollHeight;
     }
 
+    // Lichte, lokale gok naar de taal van een getypte vraag - puur om te
+    // kunnen voorstellen "deze vraag lijkt Engels, wil je overschakelen?"
+    // (en omgekeerd) als er geen antwoord gevonden werd. Bewust géén
+    // volwaardige taaldetectie: bij te weinig of dubbelzinnige signalen
+    // (score gelijk, of zin te kort) wordt niets voorgesteld.
+    const NL_HERKENNINGSWOORDEN = [
+      'de', 'het', 'een', 'ik', 'jij', 'je', 'wat', 'hoe', 'waar', 'waarom',
+      'niet', 'maar', 'kan', 'moet', 'mag', 'wil', 'zijn', 'heb', 'hebben',
+      'is', 'ben', 'en', 'of', 'met', 'voor', 'naar', 'bij', 'deze', 'dit',
+      'die', 'dat', 'mijn', 'jouw', 'wanneer', 'welke'
+    ];
+    const EN_HERKENNINGSWOORDEN = [
+      'the', 'a', 'an', 'i', 'you', 'what', 'how', 'where', 'why', 'not',
+      'but', 'can', 'must', 'may', 'want', 'are', 'have', 'has', 'is',
+      'am', 'and', 'or', 'with', 'for', 'to', 'at', 'this', 'that',
+      'these', 'those', 'my', 'your', 'when', 'which', 'do', 'does'
+    ];
+    const FR_HERKENNINGSWOORDEN = [
+      'le', 'la', 'les', 'un', 'une', 'des', 'je', 'tu', 'il', 'elle',
+      'nous', 'vous', 'ils', 'elles', 'quoi', 'comment', 'où', 'pourquoi',
+      'quand', 'quel', 'quelle', 'ne', 'pas', 'mais', 'peux', 'peut',
+      'dois', 'doit', 'veux', 'veut', 'suis', 'es', 'est', 'sont', 'et',
+      'ou', 'avec', 'pour', 'à', 'ce', 'cette', 'mon', 'ma', 'ton', 'ta'
+    ];
+
+    // Score elke taal apart en kies alleen een taal als die duidelijk (dus
+    // strikt) hoger scoort dan de andere twee - bij een gelijke stand of te
+    // weinig signaal (< 2 woorden) wordt niets voorgesteld.
+    function gokTaalVanTekst(tekst) {
+      const woorden = String(tekst || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/).filter(Boolean);
+      if (woorden.length < 2) return null;
+
+      const scores = { nl: 0, en: 0, fr: 0 };
+      woorden.forEach(function(w) {
+        if (NL_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.nl++;
+        if (EN_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.en++;
+        if (FR_HERKENNINGSWOORDEN.indexOf(w) !== -1) scores.fr++;
+      });
+
+      const talen = ['nl', 'en', 'fr'];
+      talen.sort(function(a, b) { return scores[b] - scores[a]; });
+      const beste = talen[0];
+      const tweedeBeste = talen[1];
+
+      if (scores[beste] === 0 || scores[beste] === scores[tweedeBeste]) return null;
+      return beste;
+    }
+
+    // Bewust in de vóórgestelde (dus vermoedelijke) taal van de vraag zelf
+    // getoond, niet in de huidige interface-taal - wie een Engelse vraag
+    // stelt terwijl de chat nog op Nederlands staat, kan waarschijnlijk ook
+    // beter een Engelse melding lezen dan een Nederlandse.
+    function toonTaalSuggestie(voorgesteldeTaal, oorspronkelijkeVraag) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bericht bot';
+
+      const tekstEl = document.createElement('div');
+      tekstEl.textContent = tIn(voorgesteldeTaal, 'TAAL_SUGGESTIE');
+      bubble.appendChild(tekstEl);
+
+      const optiesEl = document.createElement('div');
+      optiesEl.className = 'opties';
+      const btn = document.createElement('button');
+      btn.className = 'optieBtn';
+      btn.textContent = tIn(voorgesteldeTaal, 'TAAL_SUGGESTIE_KNOP');
+      btn.addEventListener('click', function() {
+        optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+        wisselTaal(voorgesteldeTaal);
+        herhaalVraagInAndereTaal(oorspronkelijkeVraag);
+      });
+      optiesEl.appendChild(btn);
+      bubble.appendChild(optiesEl);
+
+      berichtenEl.appendChild(bubble);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function herhaalVraagInAndereTaal(tekst) {
+      toonTypingIndicator();
+      const startTijd = Date.now();
+
+      appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst, huidigeTaal])
+        .then(async function(stap) {
+          const verstreken = Date.now() - startTijd;
+          if (verstreken < 1000) await sleep(1000 - verstreken);
+          verwijderTypingIndicator();
+          toonStap(stap);
+        })
+        .catch(function() {
+          verwijderTypingIndicator();
+          voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
+        });
+    }
+
     function verstuurVraag() {
       const tekst = inputEl.value.trim();
       if (!tekst) return;
@@ -2508,7 +2844,23 @@
           }
           if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
-          toonStap(stap);
+
+          // Geen antwoord (en dus ook geen keuzeknoppen/suggesties) gevonden?
+          // Dan eerst checken of de getypte vraag misschien gewoon in de
+          // andere taal staat dan de huidige interface. Zo ja, toon dan
+          // ALLEEN die taal-suggestie (in plaats van ook nog de generieke
+          // "geen antwoord, bel de HUB"-melding) - wie een Engelse vraag
+          // stelt heeft niets aan een Nederlandse "geen antwoord"-melding
+          // vlak vóór het aanbod om over te schakelen naar Engels.
+          const geenAntwoordGevonden = !(stap && (stap.tekst || (stap.opties && stap.opties.length) || (stap.suggesties && stap.suggesties.length)));
+          const gegokteTaal = geenAntwoordGevonden ? gokTaalVanTekst(tekst) : null;
+
+          if (geenAntwoordGevonden && gegokteTaal && gegokteTaal !== huidigeTaal) {
+            toonTaalSuggestie(gegokteTaal, tekst);
+          } else {
+            toonStap(stap);
+          }
+
           inputEl.disabled = false;
           knopEl.disabled = false;
           inputEl.focus();
