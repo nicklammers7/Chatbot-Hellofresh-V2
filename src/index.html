@@ -26,6 +26,12 @@
       --danger: #C62828;
       --focus-ring: rgba(20, 83, 45, 0.16);
       --chat-pattern: none;
+      /* Vast, thema-onafhankelijk groen voor het loginscherm en de
+         header-balk - deze twee horen er in licht én donker thema
+         precies hetzelfde uit te zien (in plaats van mee te veranderen
+         met --pine/--pine-deep), zodat het merkgevoel consistent blijft. */
+      --brand-green: #2F6B45;
+      --brand-green-deep: #1E4A30;
       --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
@@ -106,7 +112,7 @@
     }
     header {
       position: relative;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
       color: var(--bubble-user-text);
       padding: 18px 16px 14px;
       font-family: var(--font-display);
@@ -210,28 +216,32 @@
     }
     .taal-wissel {
       display: flex;
-      gap: 4px;
+      gap: 6px;
       align-items: center;
     }
     .taal-knop {
       width: 30px;
-      height: 30px;
+      height: 20px;
       flex: 0 0 auto;
+      padding: 0;
       background: transparent;
       border: none;
-      border-radius: 50%;
-      font-size: 17px;
-      line-height: 1;
+      border-radius: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0.45;
-      filter: grayscale(70%);
+      overflow: hidden;
+      opacity: 0.6;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35);
+    }
+    .taal-knop svg {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
     .taal-knop.actief {
       opacity: 1;
-      filter: none;
-      box-shadow: 0 0 0 2px var(--brass) inset;
+      box-shadow: 0 0 0 2px var(--brass);
     }
     #themaKnop {
       position: absolute;
@@ -247,9 +257,9 @@
     #loginOverlay {
       position: fixed;
       inset: 0;
-      background-color: var(--pine);
+      background-color: var(--brand-green);
       background-image:
-        radial-gradient(circle at 28% 18%, var(--pine) 0%, var(--pine-deep) 72%),
+        radial-gradient(circle at 28% 18%, var(--brand-green) 0%, var(--brand-green-deep) 72%),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cdefs%3E%3Cg id='ll' fill='none' stroke='%233F6B4D' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M -9,0 A 9,9 0 0 1 9,0 L -9,0 Z'/%3E%3Cline x1='0' y1='0' x2='7.79' y2='-4.5'/%3E%3Cline x1='0' y1='0' x2='4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='0' y2='-9'/%3E%3Cline x1='0' y1='0' x2='-4.5' y2='-7.79'/%3E%3Cline x1='0' y1='0' x2='-7.79' y2='-4.5'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23ll' transform='translate(20,25) rotate(-15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(70,15) rotate(20) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(130,30) rotate(-30) scale(1.3)'/%3E%3Cuse href='%23ll' transform='translate(180,70) rotate(10) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(40,80) rotate(40) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(100,90) rotate(-10) scale(0.7)'/%3E%3Cuse href='%23ll' transform='translate(160,120) rotate(25) scale(1.2)'/%3E%3Cuse href='%23ll' transform='translate(15,140) rotate(-25) scale(0.9)'/%3E%3Cuse href='%23ll' transform='translate(75,150) rotate(15) scale(1.1)'/%3E%3Cuse href='%23ll' transform='translate(140,170) rotate(-5) scale(0.8)'/%3E%3Cuse href='%23ll' transform='translate(190,180) rotate(35) scale(1.0)'/%3E%3Cuse href='%23ll' transform='translate(50,190) rotate(-20) scale(0.85)'/%3E%3C/g%3E%3C/defs%3E%3C/svg%3E");
       background-repeat: no-repeat, repeat;
       z-index: 40;
@@ -445,7 +455,7 @@
       justify-content: center;
       gap: 10px;
       padding: 14px;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
     }
     .faq-header::after {
       content: "";
@@ -544,7 +554,7 @@
     }
     .route-header {
       position: relative;
-      background: linear-gradient(165deg, var(--pine), var(--pine-deep));
+      background: linear-gradient(165deg, var(--brand-green), var(--brand-green-deep));
       color: var(--bubble-user-text);
       padding: 18px 16px 14px;
       font-family: var(--font-display);
@@ -1082,8 +1092,24 @@
   <div id="app">
     <div id="loginOverlay">
       <div class="taal-wissel" id="taalWisselLogin" style="position:absolute; top:16px; left:16px;">
-        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
-        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#21468B"/>
+            <rect width="30" height="13.333" fill="#FFFFFF"/>
+            <rect width="30" height="6.667" fill="#AE1C28"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="en" aria-label="English">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#00247D"/>
+            <g stroke="#FFFFFF" stroke-width="4"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <g stroke="#CF142B" stroke-width="1.6"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <rect x="12" width="6" height="20" fill="#FFFFFF"/>
+            <rect y="7" width="30" height="6" fill="#FFFFFF"/>
+            <rect x="13" width="4" height="20" fill="#CF142B"/>
+            <rect y="8" width="30" height="4" fill="#CF142B"/>
+          </svg>
+        </button>
       </div>
       <button id="themaKnopLogin" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
       <div id="loginKaart" class="login-kaart">
@@ -1119,8 +1145,24 @@
       </button>
       HelloFresh Chatbot
       <div class="taal-wissel" id="taalWisselHeader" style="position:absolute; top:50%; right:58px; transform:translateY(-50%);">
-        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">🇳🇱</button>
-        <button class="taal-knop" data-taal="en" aria-label="English">🇬🇧</button>
+        <button class="taal-knop" data-taal="nl" aria-label="Nederlands">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#21468B"/>
+            <rect width="30" height="13.333" fill="#FFFFFF"/>
+            <rect width="30" height="6.667" fill="#AE1C28"/>
+          </svg>
+        </button>
+        <button class="taal-knop" data-taal="en" aria-label="English">
+          <svg viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="30" height="20" fill="#00247D"/>
+            <g stroke="#FFFFFF" stroke-width="4"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <g stroke="#CF142B" stroke-width="1.6"><line x1="0" y1="0" x2="30" y2="20"/><line x1="30" y1="0" x2="0" y2="20"/></g>
+            <rect x="12" width="6" height="20" fill="#FFFFFF"/>
+            <rect y="7" width="30" height="6" fill="#FFFFFF"/>
+            <rect x="13" width="4" height="20" fill="#CF142B"/>
+            <rect y="8" width="30" height="4" fill="#CF142B"/>
+          </svg>
+        </button>
       </div>
       <button id="themaKnop" class="thema-knop" aria-label="Wissel tussen licht en donker thema"></button>
     </header>
@@ -1550,7 +1592,9 @@
         CHAT_VRAAG_GEANNULEERD: 'Vraag geannuleerd.',
         CHAT_ANNULEER_ARIA: 'Vraag annuleren',
         CHAT_INPUT_PLACEHOLDER: 'Typ je vraag...',
-        CHAT_VERSTUUR: 'Verstuur'
+        CHAT_VERSTUUR: 'Verstuur',
+        TAAL_SUGGESTIE: 'Deze vraag lijkt in het Engels te zijn. Wil je overschakelen naar Engels?',
+        TAAL_SUGGESTIE_KNOP: 'Overschakelen naar Engels'
       },
       en: {
         LOGIN_PLACEHOLDER_EMAIL: 'Enter your MobileNXT email address',
@@ -1720,7 +1764,9 @@
         CHAT_VRAAG_GEANNULEERD: 'Question cancelled.',
         CHAT_ANNULEER_ARIA: 'Cancel question',
         CHAT_INPUT_PLACEHOLDER: 'Type your question...',
-        CHAT_VERSTUUR: 'Send'
+        CHAT_VERSTUUR: 'Send',
+        TAAL_SUGGESTIE: 'This question looks like it\'s in Dutch. Would you like to switch to Dutch?',
+        TAAL_SUGGESTIE_KNOP: 'Switch to Dutch'
       }
     };
 
@@ -2475,6 +2521,81 @@
       berichtenEl.scrollTop = berichtenEl.scrollHeight;
     }
 
+    // Lichte, lokale gok naar de taal van een getypte vraag - puur om te
+    // kunnen voorstellen "deze vraag lijkt Engels, wil je overschakelen?"
+    // (en omgekeerd) als er geen antwoord gevonden werd. Bewust géén
+    // volwaardige taaldetectie: bij te weinig of dubbelzinnige signalen
+    // (score gelijk, of zin te kort) wordt niets voorgesteld.
+    const NL_HERKENNINGSWOORDEN = [
+      'de', 'het', 'een', 'ik', 'jij', 'je', 'wat', 'hoe', 'waar', 'waarom',
+      'niet', 'maar', 'kan', 'moet', 'mag', 'wil', 'zijn', 'heb', 'hebben',
+      'is', 'ben', 'en', 'of', 'met', 'voor', 'naar', 'bij', 'deze', 'dit',
+      'die', 'dat', 'mijn', 'jouw', 'wanneer', 'welke'
+    ];
+    const EN_HERKENNINGSWOORDEN = [
+      'the', 'a', 'an', 'i', 'you', 'what', 'how', 'where', 'why', 'not',
+      'but', 'can', 'must', 'may', 'want', 'are', 'have', 'has', 'is',
+      'am', 'and', 'or', 'with', 'for', 'to', 'at', 'this', 'that',
+      'these', 'those', 'my', 'your', 'when', 'which', 'do', 'does'
+    ];
+
+    function gokTaalVanTekst(tekst) {
+      const woorden = String(tekst || '').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/).filter(Boolean);
+      if (woorden.length < 2) return null;
+
+      let nlScore = 0;
+      let enScore = 0;
+      woorden.forEach(function(w) {
+        if (NL_HERKENNINGSWOORDEN.indexOf(w) !== -1) nlScore++;
+        if (EN_HERKENNINGSWOORDEN.indexOf(w) !== -1) enScore++;
+      });
+
+      if (nlScore === enScore) return null;
+      return nlScore > enScore ? 'nl' : 'en';
+    }
+
+    function toonTaalSuggestie(voorgesteldeTaal, oorspronkelijkeVraag) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bericht bot';
+
+      const tekstEl = document.createElement('div');
+      tekstEl.textContent = t('TAAL_SUGGESTIE');
+      bubble.appendChild(tekstEl);
+
+      const optiesEl = document.createElement('div');
+      optiesEl.className = 'opties';
+      const btn = document.createElement('button');
+      btn.className = 'optieBtn';
+      btn.textContent = t('TAAL_SUGGESTIE_KNOP');
+      btn.addEventListener('click', function() {
+        optiesEl.querySelectorAll('button').forEach(function(b) { b.disabled = true; });
+        wisselTaal(voorgesteldeTaal);
+        herhaalVraagInAndereTaal(oorspronkelijkeVraag);
+      });
+      optiesEl.appendChild(btn);
+      bubble.appendChild(optiesEl);
+
+      berichtenEl.appendChild(bubble);
+      berichtenEl.scrollTop = berichtenEl.scrollHeight;
+    }
+
+    function herhaalVraagInAndereTaal(tekst) {
+      toonTypingIndicator();
+      const startTijd = Date.now();
+
+      appsScriptCall('zoekAntwoord', [huidigeId, huidigeApparaatToken, tekst, huidigeTaal])
+        .then(async function(stap) {
+          const verstreken = Date.now() - startTijd;
+          if (verstreken < 1000) await sleep(1000 - verstreken);
+          verwijderTypingIndicator();
+          toonStap(stap);
+        })
+        .catch(function() {
+          verwijderTypingIndicator();
+          voegBerichtToe(t('ER_GING_IETS_MIS'), 'bot');
+        });
+    }
+
     function verstuurVraag() {
       const tekst = inputEl.value.trim();
       if (!tekst) return;
@@ -2509,6 +2630,19 @@
           if (ditVolgnummer !== vraagVolgnummer) return; // inmiddels geannuleerd
           verwijderTypingIndicator();
           toonStap(stap);
+
+          // Geen antwoord (en dus ook geen keuzeknoppen/suggesties) gevonden?
+          // Dan checken of de getypte vraag misschien gewoon in de andere
+          // taal staat dan de huidige interface - zo niet, blijft het bij de
+          // gewone "geen antwoord"-melding uit toonStap hierboven.
+          const geenAntwoordGevonden = !(stap && (stap.tekst || (stap.opties && stap.opties.length) || (stap.suggesties && stap.suggesties.length)));
+          if (geenAntwoordGevonden) {
+            const gegokteTaal = gokTaalVanTekst(tekst);
+            if (gegokteTaal && gegokteTaal !== huidigeTaal) {
+              toonTaalSuggestie(gegokteTaal, tekst);
+            }
+          }
+
           inputEl.disabled = false;
           knopEl.disabled = false;
           inputEl.focus();
